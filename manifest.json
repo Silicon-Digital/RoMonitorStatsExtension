@@ -2,7 +2,7 @@
   "update_url": "https://clients2.google.com/service/update2/crx",
   "manifest_version": 2,
   "name": "RoMonitor Stats - Roblox Stats",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "View Roblox game analytics from RoMonitor Stats inside Roblox",
   "content_scripts": [
     {
