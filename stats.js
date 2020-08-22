@@ -217,14 +217,18 @@ function addTabListener(tab, aboutContent) {
 
       postData({ game: extensionConfiguration.activePlaceID, tab: tab.id })
         .then((data) => {
-          if (tab.id === 'socialGraph') {
-            socialGraphData = data['data'];
-            buildSocialGraphTab();
-            loadingStore.socialGraph = false;
-          } else if (tab.id === 'nameChanges') {
-            nameChangesGraphData = data['data'];
-            buildNameChangesTab();
-            loadingStore.nameChangesGraphData = false;
+          if (data.success) {
+            if (tab.id === 'socialGraph') {
+              socialGraphData = data['data'];
+              buildSocialGraphTab();
+              loadingStore.socialGraph = false;
+            } else if (tab.id === 'nameChanges') {
+              nameChangesGraphData = data['data'];
+              buildNameChangesTab();
+              loadingStore.nameChangesGraphData = false;
+            }
+          } else if (data && !data.success && data.message) {
+            createRobloxError(data.message, data.icon);
           }
         });
     }
@@ -292,7 +296,6 @@ function buildMilestonesTab() {
 
     return;
   }
-
   milestonesContainer[0].appendChild(milestonesTable);
 
   Object.keys(gameData.milestones).reverse().forEach((milestoneIndex) => {
@@ -322,7 +325,11 @@ function buildNameChangesTab() {
 
     return;
   }
+  const limitWarning = document.createElement('div');
+  limitWarning.classList.add('text-label');
+  limitWarning.innerHTML = 'Showing the Last 10 Name Changes';
 
+  nameChangesContainer[0].appendChild(limitWarning);
   nameChangesContainer[0].appendChild(nameChangesTable);
 
   Object.keys(nameChangesGraphData).reverse().forEach((changeIndex) => {
