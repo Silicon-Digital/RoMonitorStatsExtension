@@ -32,11 +32,12 @@ async function prefabChecks() {
     return await postData({ game: extensionConfiguration.activePlaceID })
       .then((data) => {
         if (data && data.success) {
+          document.getElementByClass('rbx-tab').style.width = '25% !important';
           gameData = data;
 
           return true
-        } else if (data && !data.success && data.message) {
-          createRobloxError(data.message, data.icon);
+        } else if (data && !data.success && data.message && data.code) {
+          createRobloxError(data.message, data.icon, data.code);
         }
 
         return false;
@@ -77,7 +78,7 @@ async function postData(data = {}) {
     });
 }
 
-function createRobloxError(message, icon = 'icon-warning') {
+function createRobloxError(message, icon = 'icon-warning', code = null) {
   const tabContainer = document.getElementsByClassName('col-xs-12 rbx-tabs-horizontal')[0];
   const messageBanner = document.createElement('div');
   
