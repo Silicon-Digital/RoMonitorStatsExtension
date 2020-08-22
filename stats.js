@@ -32,7 +32,12 @@ async function prefabChecks() {
     return await postData({ game: extensionConfiguration.activePlaceID })
       .then((data) => {
         if (data && data.success) {
-          document.getElementByClass('rbx-tab').style.width = '25% !important';
+          const tabFixCss = '.rbx-tab { width: 25% !important };';
+          const styleElement = document.createElement('style');
+          document.head.appendChild(styleElement);
+          styleElement.type = 'text/css';
+          styleElement.appendChild(document.createTextNode(tabFixCss));
+
           gameData = data;
 
           return true
