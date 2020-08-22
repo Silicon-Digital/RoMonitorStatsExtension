@@ -3,7 +3,3 @@
     margin: 5px;
     height: 100px;
 }
-/* Fixes tab issues on the Roblox games page */
-.rbx-tab {
-    width: 25% !important;
-}
