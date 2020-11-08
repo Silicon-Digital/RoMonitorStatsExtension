@@ -14,6 +14,8 @@
       ],
       "matches": [
         "*://*.roblox.com/games/*",
+        "*://*.roblox.com/users/*",
+        "*://*.roblox.com/groups/*",
         "https://stats.romonitor.silicon.digital/api/v1/extension/*"
       ]
     }
