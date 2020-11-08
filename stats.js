@@ -12,10 +12,10 @@ let socialGraphData = null;
 let nameChangesGraphData = null;
 
 window.addEventListener('load', async function () {
-  const check = await prefabChecks();
+  const group = await prefabChecks();
 
-  if (check) {
-    buildTabs();
+  if (group) {
+    buildTabs(group);
   }
 });
 
@@ -35,13 +35,17 @@ async function prefabChecks() {
 
           gameData = data;
 
-          return true
+          return 'game'
         } else if (data && !data.success && data.message && data.code) {
           createRobloxError(data.message, data.icon, data.code);
         }
 
         return false;
       });
+  } else if (window.location.pathname.match(/\/users\/.*/)) {
+    return 'user'
+  } else if (window.location.pathname.match(/\/groups\/.*/)) {
+    return 'group'
   }
 
   return false;
@@ -91,7 +95,7 @@ function createRobloxError(message, icon = 'icon-warning', code = null) {
   tabContainer.insertBefore(messageBanner, tabContainer.firstChild);
 }
 
-function getTabs() {
+function getTabs(group = 'games') {
   return [
     {
       title: 'Stats',
@@ -114,6 +118,9 @@ function getTabs() {
       id: 'go-to-stats',
       href: `https://stats.romonitor.silicon.digital/game/${extensionConfiguration.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
       target: '_blank',
+    },
+    function groupLogic() {
+      console.log('tab logic running');
     }
   ];
 }
