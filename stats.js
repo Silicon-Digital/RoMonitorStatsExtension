@@ -1,11 +1,6 @@
 let extensionConfiguration = {
   apiEndpoint: 'https://stats.romonitor.silicon.digital/api/v1/extension/',
   activePlaceID: null,
-  revenueCurrencies: [
-    'USD',
-    'GBP',
-    'AUD'
-  ]
 };
 
 let loadingStore = {
@@ -14,7 +9,7 @@ let loadingStore = {
 
 let gameData = null;
 let socialGraphData = null;
-let revenueGraphData = null;
+let nameChangesGraphData = null;
 
 window.addEventListener('load', async function () {
   const check = await prefabChecks();
@@ -32,11 +27,17 @@ async function prefabChecks() {
     return await postData({ game: extensionConfiguration.activePlaceID })
       .then((data) => {
         if (data && data.success) {
+          const tabFixCss = '.rbx-tab { width: 25% !important };';
+          const styleElement = document.createElement('style');
+          document.head.appendChild(styleElement);
+          styleElement.type = 'text/css';
+          styleElement.appendChild(document.createTextNode(tabFixCss));
+
           gameData = data;
 
           return true
-        } else if (data && !data.success && data.message) {
-          createRobloxError(data.message, data.icon);
+        } else if (data && !data.success && data.message && data.code) {
+          createRobloxError(data.message, data.icon, data.code);
         }
 
         return false;
@@ -67,6 +68,9 @@ async function postData(data = {}) {
       } else if (response.status === 502) {
         this.createRobloxError('RoMonitor Stats is currently undergoing maintainance');
         return;
+      } else if (response.status === 422) {
+        this.createRobloxError('Invalid request sent to RoMonitor Stats');
+        return;
       }
 
       return response.json();
@@ -77,7 +81,7 @@ async function postData(data = {}) {
     });
 }
 
-function createRobloxError(message, icon = 'icon-warning') {
+function createRobloxError(message, icon = 'icon-warning', code = null) {
   const tabContainer = document.getElementsByClassName('col-xs-12 rbx-tabs-horizontal')[0];
   const messageBanner = document.createElement('div');
   
@@ -94,16 +98,16 @@ function getTabs() {
       id: 'stats',
     },
     {
-      title: 'Revenue',
-      id: 'revenue',
-    },
-    {
       title: 'Milestones',
       id: 'milestones',
     },
     {
       title: 'Social Graph',
       id: 'social-graph',
+    },
+    {
+      title: 'Name Changes',
+      id: 'name-changes',
     },
     {
       title: 'RoMonitor Stats',
@@ -180,7 +184,7 @@ function addTabListener(tab, aboutContent) {
   tab.addEventListener('click', function () {
     removeAllTabActiveStates();
 
-    if (tab.id === 'tab-social-graph' || tab.id === 'tab-revenue') {
+    if (tab.id === 'tab-social-graph' || tab.id === 'tab-name-changes') {
       if (tab.id === 'tab-social-graph' && socialGraphData) {
         if (socialGraphData) {
           return;
@@ -189,11 +193,11 @@ function addTabListener(tab, aboutContent) {
         }
       }
 
-      if (tab.id === 'tab-revenue' && revenueGraphData) {
-        if (revenueGraphData) {
+      if (tab.id === 'tab-name-changes' && nameChangesGraphData) {
+        if (nameChangesGraphData) {
           return;
         } else {
-          loadingStore.revenueGraph = true;
+          loadingStore.nameChangesGraph = true;
         }
       }
 
@@ -207,20 +211,24 @@ function addTabListener(tab, aboutContent) {
 
       if (tab.id === 'tab-social-graph') {
         tab.id = 'socialGraph';
-      } else if (tab.id === 'tab-revenue') {
-        tab.id = 'revenue';
+      } else if (tab.id === 'tab-name-changes') {
+        tab.id = 'nameChanges';
       }
 
       postData({ game: extensionConfiguration.activePlaceID, tab: tab.id })
         .then((data) => {
-          if (tab.id === 'socialGraph') {
-            socialGraphData = data['data'];
-            buildSocialGraphTab();
-            loadingStore.socialGraph = false;
-          } else if (tab.id === 'revenue') {
-            revenueGraphData = data['data'];
-            buildRevenueTab();
-            loadingStore.revenueGraphData = false;
+          if (data.success) {
+            if (tab.id === 'socialGraph') {
+              socialGraphData = data['data'];
+              buildSocialGraphTab();
+              loadingStore.socialGraph = false;
+            } else if (tab.id === 'nameChanges') {
+              nameChangesGraphData = data['data'];
+              buildNameChangesTab();
+              loadingStore.nameChangesGraphData = false;
+            }
+          } else if (data && !data.success && data.message) {
+            createRobloxError(data.message, data.icon);
           }
         });
     }
@@ -288,7 +296,6 @@ function buildMilestonesTab() {
 
     return;
   }
-
   milestonesContainer[0].appendChild(milestonesTable);
 
   Object.keys(gameData.milestones).reverse().forEach((milestoneIndex) => {
@@ -298,57 +305,40 @@ function buildMilestonesTab() {
 
     document.getElementById('milestones-table').appendChild(milestoneEntry);
   });
-
 }
 
-function buildRevenueTab() {
-  document.getElementById('revenue-loader').remove();
-  const revenueContainer = document.getElementsByClassName('tab-pane revenue');
-  /** Below code is for a future extension update for currency select */
-  // const buttonContainer = document.createElement('div');
-  // buttonContainer.classList.add('input-group-btn');
-  // buttonContainer.innerHTML = '<button type="button" class="input-dropdown-btn" data-toggle="dropdown"> <span class="rbx-selection-label" data-bind="label">Currency</span><span class="icon-down-16x16"></span></button><ul id="currency-select" data-toggle="dropdown-menu" class="dropdown-menu" role="menu"></ul>'
-  // revenueContainer[0].appendChild(buttonContainer);
+function buildNameChangesTab() {
+  document.getElementById('name-changes-loader').remove();
+  const nameChangesContainer = document.getElementsByClassName('tab-pane name-changes');
+  const nameChangesTable = document.createElement('table');
+  nameChangesTable.classList.add('table');
+  nameChangesTable.classList.add('table-striped');
+  nameChangesTable.innerHTML = '<thead><tr><th class="text-label">Name</th><th class="text-label">Changed</th></tr></thead><tbody id="name-changes-table"></tbody>';
 
-  // const currencySelectList = document.getElementById('currency-select');
-  // extensionConfiguration.revenueCurrencies.forEach((currency) => {
-  //   const currencyEntry = document.createElement('li');
+  if (!Object.keys(nameChangesGraphData).length) {
+    const messageBanner = document.createElement('div');
 
-  //   currencyEntry.innerHTML = `<a href="#">${currency}</a>`
-  //   currencySelectList.appendChild(currencyEntry);
-  // });
+    messageBanner.classList.add('message-banner');
+    messageBanner.innerHTML = `<span class="icon-warning"></span> This game has no tracked name changes`;
+    messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+    nameChangesContainer[0].appendChild(messageBanner);
 
-  const flexboxContainer = document.createElement('div');
-  flexboxContainer.style = 'display: flex; flex-wrap: wrap;';
-
-  let isRevenueEmpty = false;
-
-  revenueGraphData.items.forEach((item) => {
-    const gridEntry = document.createElement('div');
-    gridEntry.classList.add('romonitor-grid-item');
-    gridEntry.innerHTML = `<h2 style="
-    text-align: center;
-">${item.copy}</h2>
-    <p style="
-    text-align: center;
-">${item.title}</p>`
-    flexboxContainer.appendChild(gridEntry);
-
-    if (item.copy === 'None') {
-      isRevenueEmpty = true;
-    }
-  });
-
-  if (isRevenueEmpty) {
-    const revenueMessageBanner = document.createElement('div');
-
-    revenueMessageBanner.classList.add('message-banner');
-    revenueMessageBanner.innerHTML = `<span class="icon-warning"></span> This game has no gamepasses with sales`;
-    revenueMessageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
-    revenueContainer[0].appendChild(revenueMessageBanner);
-  } else {
-    revenueContainer[0].appendChild(flexboxContainer);
+    return;
   }
+  const limitWarning = document.createElement('div');
+  limitWarning.classList.add('text-label');
+  limitWarning.innerHTML = 'Showing the Last 10 Name Changes';
+
+  nameChangesContainer[0].appendChild(limitWarning);
+  nameChangesContainer[0].appendChild(nameChangesTable);
+
+  Object.keys(nameChangesGraphData).reverse().forEach((changeIndex) => {
+    const nameChange = nameChangesGraphData[changeIndex];
+    const changeEntry = document.createElement('tr');
+    changeEntry.innerHTML = `<td>${nameChange.name}</td><td>${nameChange.changed}</td>`;
+
+    document.getElementById('name-changes-table').appendChild(changeEntry);
+  });
 }
 
 function buildSocialGraphTab() {

@@ -1,0 +1,25 @@
+{
+  "update_url": "https://clients2.google.com/service/update2/crx",
+  "manifest_version": 2,
+  "name": "RoMonitor Stats - Roblox Stats",
+  "version": "1.0.3",
+  "description": "View Roblox game analytics from RoMonitor Stats inside Roblox",
+  "content_scripts": [
+    {
+      "js": [
+        "stats.js"
+      ],
+      "css": [
+        "romonitor.css"
+      ],
+      "matches": [
+        "*://*.roblox.com/games/*",
+        "https://stats.romonitor.silicon.digital/api/v1/extension/*"
+      ]
+    }
+  ],
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
