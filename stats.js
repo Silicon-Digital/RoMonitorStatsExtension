@@ -162,7 +162,7 @@ function buildTabs() {
 
       const containerHeader = document.createElement('div');
       containerHeader.classList.add('container-header');
-      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">Powered by <a href="https://stats.romonitor.silicon.digital/" class="text-link">RoMonitor Stats</a></div>`;
+      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">Powered by <a href="https://stats.romonitor.silicon.digital/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough" class="text-link">RoMonitor Stats</a></div>`;
       firstTabContent.appendChild(containerHeader);
     }
 
