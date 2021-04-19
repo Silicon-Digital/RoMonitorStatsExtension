@@ -1,6 +1,8 @@
 let extensionConfiguration = {
-  apiEndpoint: 'https://stats.romonitor.silicon.digital/api/v1/extension/',
+  apiEndpoint: 'https://silicondigital-romonitor.officeserver/api/v1/extension/',
   activePlaceID: null,
+  activeUserID: null,
+  activeGroupId: null
 };
 
 let loadingStore = {
@@ -8,6 +10,7 @@ let loadingStore = {
 };
 
 let gameData = null;
+let userData = null;
 let socialGraphData = null;
 let nameChangesGraphData = null;
 
@@ -42,7 +45,34 @@ async function prefabChecks() {
 
         return false;
       });
+  } else if (window.location.pathname.match(/\/users\/[0-9]*\/profile.*/)) {
+    const routeMatchings = window.location.pathname.match(/\/users\/([0-9]*)\/profile.*/);
+
+    if (routeMatchings[1]) {
+      // We've found a user ID in the route, so we can continue.
+      extensionConfiguration.activeUserID = routeMatchings[1];
+
+      return await postData({ user: extensionConfiguration.activeUserID })
+        .then((data) => {
+          if (data && data.success) {
+            const tabFixCss = '.rbx-tab { width: 25% !important };';
+            const styleElement = document.createElement('style');
+            document.head.appendChild(styleElement);
+            styleElement.type = 'text/css';
+            styleElement.appendChild(document.createTextNode(tabFixCss));
+
+            userData = data;
+
+            return true
+          } else if (data && !data.success && data.message && data.code) {
+            createRobloxError(data.message, data.icon, data.code);
+          }
+
+          return false;
+        });
+    }
   }
+
 
   return false;
 }
@@ -82,46 +112,74 @@ async function postData(data = {}) {
 }
 
 function createRobloxError(message, icon = 'icon-warning', code = null) {
-  const tabContainer = document.getElementsByClassName('col-xs-12 rbx-tabs-horizontal')[0];
+  const tabContainer = document.getElementsByClassName('rbx-tabs-horizontal')[0];
   const messageBanner = document.createElement('div');
-  
+
   messageBanner.classList.add('message-banner');
   messageBanner.innerHTML = `<span class="${icon}"></span> ${message}`;
   messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
   tabContainer.insertBefore(messageBanner, tabContainer.firstChild);
 }
 
-function getTabs() {
-  return [
-    {
-      title: 'Stats',
-      id: 'stats',
-    },
-    {
-      title: 'Milestones',
-      id: 'milestones',
-    },
-    {
-      title: 'Social Graph',
-      id: 'social-graph',
-    },
-    {
-      title: 'Name Changes',
-      id: 'name-changes',
-    },
-    {
-      title: 'RoMonitor Stats',
-      id: 'go-to-stats',
-      href: `https://stats.romonitor.silicon.digital/game/${extensionConfiguration.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
-      target: '_blank',
-    }
-  ];
+function getTabs(tabGroup = 'game') {
+  console.log(tabGroup);
+  const tabGroups = {
+    game: [
+      {
+        title: 'Stats',
+        id: 'game-stats',
+      },
+      {
+        title: 'Milestones',
+        id: 'milestones',
+      },
+      {
+        title: 'Social Graph',
+        id: 'social-graph',
+      },
+      {
+        title: 'Name Changes',
+        id: 'name-changes',
+      },
+      {
+        title: 'RoMonitor Stats',
+        id: 'go-to-stats',
+        href: `https://romonitorstats.com/game/${extensionConfiguration.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
+        target: '_blank',
+      }
+    ],
+    user: [
+      {
+        title: 'Stats',
+        id: 'user-stats',
+      },
+      {
+        title: 'Social Graph',
+        id: 'social-graph',
+      },
+      {
+        title: 'RoMonitor Stats',
+        id: 'go-to-stats',
+        href: `https://romonitorstats.com/user/${extensionConfiguration.activeUserID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
+        target: '_blank',
+      }
+    ]
+  };
+
+  return tabGroups[tabGroup];
 }
 
 function buildTabs() {
   lastAddedTab = null;
 
-  getTabs().forEach((tab) => {
+  let tabGroup = 'game';
+
+  if (extensionConfiguration.activeUserID) {
+    tabGroup = 'user';
+  }
+
+  getTabs(tabGroup).forEach((tab) => {
+    console.log(tab);
     var gameNavigationTabs = document.getElementById("horizontal-tabs");
     var newTab = gameNavigationTabs.lastChild.cloneNode(true);
     var tabTitle = newTab.getElementsByClassName('text-lead')[0];
@@ -155,15 +213,17 @@ function buildTabs() {
 
       const containerHeader = document.createElement('div');
       containerHeader.classList.add('container-header');
-      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">Powered by <a href="https://stats.romonitor.silicon.digital/" class="text-link">RoMonitor Stats</a></div>`;
+      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">Powered by <a href="https://romonitorstats.com/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough" class="text-link">RoMonitor Stats</a></div>`;
       firstTabContent.appendChild(containerHeader);
     }
 
     /** The following are lightweight queries to our servers, so we build these to make the tabs load faster, others are dynamically injected. */
     if (tab.title === 'Milestones') {
       buildMilestonesTab();
-    } else if (tab.title === 'Stats') {
+    } else if (tab.id === 'game-stats') {
       buildStatsTab();
+    } else if (tab.id === 'user-stats') {
+      buildUserStatsTab();
     }
 
     if (!tab.href) {
@@ -252,7 +312,7 @@ function removeAllTabActiveStates() {
 }
 
 function buildStatsTab() {
-  const statsContainer = document.getElementsByClassName('tab-pane stats');
+  const statsContainer = document.getElementsByClassName('tab-pane game-stats');
   const flexboxContainer = document.createElement('div');
   flexboxContainer.style = 'display: flex; flex-wrap: wrap;';
 
@@ -284,7 +344,7 @@ function buildMilestonesTab() {
   const milestonesTable = document.createElement('table');
   milestonesTable.classList.add('table');
   milestonesTable.classList.add('table-striped');
-  milestonesTable.innerHTML = '<thead><tr><th class="text-label">Milestone</th><th class="text-label">Achived</th></tr></thead><tbody id="milestones-table"></tbody>';
+  milestonesTable.innerHTML = '<thead><tr><th class="text-label">Milestone</th><th class="text-label">Achieved</th><th class="text-label" style="text-align: center;">Tweet</th></tr></thead><tbody id="milestones-table"></tbody>';
 
   if (!Object.keys(gameData.milestones).length) {
     const messageBanner = document.createElement('div');
@@ -301,7 +361,15 @@ function buildMilestonesTab() {
   Object.keys(gameData.milestones).reverse().forEach((milestoneIndex) => {
     const milestone = gameData.milestones[milestoneIndex];
     const milestoneEntry = document.createElement('tr');
-    milestoneEntry.innerHTML = `<td>${milestone.value} ${milestone.type}</td><td>${milestone.achieved}</td>`;
+    milestoneEntry.innerHTML = `
+    <td>${milestone.value} ${milestone.type}</td>
+    <td>${milestone.achieved}</td>
+    ${milestone.tweet ? `<td class="text-center">
+    <a href="${milestone.tweet}" target="_blank">
+      <svg fill="#1DA1F2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+    </a>
+      </td>` : '<td></td>'}
+    `;
 
     document.getElementById('milestones-table').appendChild(milestoneEntry);
   });
@@ -370,4 +438,31 @@ function buildSocialGraphTab() {
 
     socialGraphContainer[0].appendChild(flexboxContainer);
   }
+}
+
+function buildUserStatsTab() {
+  const statsContainer = document.getElementsByClassName('tab-pane user-stats');
+  const flexboxContainer = document.createElement('div');
+  flexboxContainer.style = 'display: flex; flex-wrap: wrap;';
+
+  userData.stats.items.forEach((item) => {
+    const gridEntry = document.createElement('div');
+    gridEntry.classList.add('romonitor-grid-item');
+    gridEntry.innerHTML = `<h2 style="
+    text-align: center;
+">${item.copy}</h2>
+    <p style="
+    text-align: center;
+">${item.title}</p>`
+    flexboxContainer.appendChild(gridEntry);
+  });
+
+  statsContainer[0].appendChild(flexboxContainer);
+}
+
+/**
+ * 
+ */
+if (chrome.runtime.setUninstallURL) {
+  chrome.runtime.setUninstallURL('https://romonitorstats.com/extension/uninstalled/?browser=chrome');
 }
