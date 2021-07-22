@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "RoMonitor Stats - Roblox Stats",
     "author": "Silicon Digital Group Ltd",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "View Roblox game analytics from RoMonitor Stats inside Roblox",
     "content_scripts": [
       {
@@ -16,7 +16,7 @@
           "*://*.roblox.com/games/*",
           "*://*.roblox.com/users/*",
           "*://*.roblox.com/groups/*",
-          "https://stats.romonitor.silicon.digital/api/v1/extension/*"
+          "https://romonitorstats.com/api/v1/extension/*"
         ]
       }
     ],
@@ -24,7 +24,7 @@
       "*://*.roblox.com/games/*",
       "*://*.roblox.com/users/*",
       "*://*.roblox.com/groups/*",
-      "https://stats.romonitor.silicon.digital/api/v1/extension/*",
+      "https://romonitorstats.com/api/v1/extension/*",
       "webRequest"
     ],
     "icons": {
