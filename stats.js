@@ -1,5 +1,5 @@
 let extensionConfiguration = {
-  apiEndpoint: 'https://stats.romonitor.silicon.digital/api/v1/extension/',
+  apiEndpoint: 'https://romonitorstats.com/api/v1/extension/',
   activePlaceID: null,
 };
 
@@ -112,7 +112,7 @@ function getTabs() {
     {
       title: 'RoMonitor Stats',
       id: 'go-to-stats',
-      href: `https://stats.romonitor.silicon.digital/game/${extensionConfiguration.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
+      href: `https://romonitorstats.com/experience/${extensionConfiguration.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
       target: '_blank',
     }
   ];
@@ -155,7 +155,7 @@ function buildTabs() {
 
       const containerHeader = document.createElement('div');
       containerHeader.classList.add('container-header');
-      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">Powered by <a href="https://stats.romonitor.silicon.digital/" class="text-link">RoMonitor Stats</a></div>`;
+      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">Powered by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a></div>`;
       firstTabContent.appendChild(containerHeader);
     }
 
