@@ -11,6 +11,7 @@ let gameData = null;
 let socialGraphData = null;
 let nameChangesGraphData = null;
 
+
 window.addEventListener('load', async function () {
   const check = await prefabChecks();
 
@@ -57,26 +58,26 @@ async function postData(data = {}) {
   })
     .then(response => {
       if (response.status === 429) {
-        this.createRobloxError("You're sending too many requests to RoMonitor Stats");
+        this.createRobloxError(chrome.i18n.getMessage('429Error'));
         return;
       } else if (response.status === 500) {
-        this.createRobloxError('RoMonitor Stats hit an exception, our monitoring tool has logged this');
+        this.createRobloxError(chrome.i18n.getMessage('500Error'));
         return;
       } else if (response.status === 404) {
-        this.createRobloxError('The RoMonitor Stats extension endpoint is not available');
+        this.createRobloxError(chrome.i18n.getMessage('404Error'));
         return;
       } else if (response.status === 502) {
-        this.createRobloxError('RoMonitor Stats is currently undergoing maintainance');
+        this.createRobloxError(chrome.i18n.getMessage('502Error'));
         return;
       } else if (response.status === 422) {
-        this.createRobloxError('Invalid request sent to RoMonitor Stats');
+        this.createRobloxError(chrome.i18n.getMessage('422Error'));
         return;
       }
 
       return response.json();
     })
     .catch((error) => {
-      this.createRobloxError('Unable to contact RoMonitor Stats');
+      this.createRobloxError(chrome.i18n.getMessage('contactError'));
       Promise.reject(error);
     });
 }
@@ -94,29 +95,30 @@ function createRobloxError(message, icon = 'icon-warning', code = null) {
 function getTabs() {
   return [
     {
-      title: 'Stats',
+      title: chrome.i18n.getMessage('tabStats'),
       id: 'stats',
     },
     {
-      title: 'Milestones',
+      title: chrome.i18n.getMessage('tabMilestones'),
       id: 'milestones',
     },
     {
-      title: 'Social Graph',
+      title: chrome.i18n.getMessage('tabSocialGraph'),
       id: 'social-graph',
     },
     {
-      title: 'Name Changes',
+      title: chrome.i18n.getMessage('tabNameChanges'),
       id: 'name-changes',
     },
     {
-      title: 'RoMonitor Stats',
+      title: chrome.i18n.getMessage('tabRoMonitor'),
       id: 'go-to-stats',
       href: `https://romonitorstats.com/experience/${extensionConfiguration.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
       target: '_blank',
     }
   ];
 }
+
 
 function buildTabs() {
   lastAddedTab = null;
@@ -155,14 +157,14 @@ function buildTabs() {
 
       const containerHeader = document.createElement('div');
       containerHeader.classList.add('container-header');
-      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">Powered by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a></div>`;
+      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">${chrome.i18n.getMessage('PoweredBy')} <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a></div>`;
       firstTabContent.appendChild(containerHeader);
     }
 
     /** The following are lightweight queries to our servers, so we build these to make the tabs load faster, others are dynamically injected. */
-    if (tab.title === 'Milestones') {
+    if (tab.title === chrome.i18n.getMessage('tabMilestones')) {
       buildMilestonesTab();
-    } else if (tab.title === 'Stats') {
+    } else if (tab.title === chrome.i18n.getMessage('tabStats')) {
       buildStatsTab();
     }
 
@@ -170,6 +172,7 @@ function buildTabs() {
       addTabListener(newTab, firstTabContent)
     }
   });
+
 
   /** Adds event listeners to the default Roblox tabs */
   const baseRobloxTabs = ['about', 'store', 'game-instances'];
@@ -251,6 +254,17 @@ function removeAllTabActiveStates() {
   }
 }
 
+function findTranslation(str) {
+  var replaced = str.split(' ').join('_');
+  var translation = chrome.i18n.getMessage(replaced);
+
+  if (translation != '') {
+    return translation
+  } else {
+    return str
+  }
+}
+
 function buildStatsTab() {
   const statsContainer = document.getElementsByClassName('tab-pane stats');
   const flexboxContainer = document.createElement('div');
@@ -260,7 +274,7 @@ function buildStatsTab() {
   const upVotes = Number(document.getElementsByClassName('count-left')[0].firstElementChild.title)
   const downVotes = Number(document.getElementsByClassName('count-right')[0].firstElementChild.title)
   gameData.stats.items.push({
-    title: 'Rating',
+    title: chrome.i18n.getMessage('Rating'),
     copy: `${(upVotes / (upVotes + downVotes) * 100).toFixed(2)}%`,
   });
 
@@ -272,7 +286,7 @@ function buildStatsTab() {
 ">${item.copy}</h2>
     <p style="
     text-align: center;
-">${item.title}</p>`
+">${findTranslation(item.title)}</p>`
     flexboxContainer.appendChild(gridEntry);
   });
 
@@ -284,13 +298,13 @@ function buildMilestonesTab() {
   const milestonesTable = document.createElement('table');
   milestonesTable.classList.add('table');
   milestonesTable.classList.add('table-striped');
-  milestonesTable.innerHTML = '<thead><tr><th class="text-label">Milestone</th><th class="text-label">Achived</th></tr></thead><tbody id="milestones-table"></tbody>';
+  milestonesTable.innerHTML = `<thead><tr><th class="text-label">${chrome.i18n.getMessage('tableM_Milestone')}</th><th class="text-label">${chrome.i18n.getMessage('tableM_Achived')}</th></tr></thead><tbody id="milestones-table"></tbody>`;
 
   if (!Object.keys(gameData.milestones).length) {
     const messageBanner = document.createElement('div');
 
     messageBanner.classList.add('message-banner');
-    messageBanner.innerHTML = `<span class="icon-warning"></span> This game has no tracked milestones`;
+    messageBanner.innerHTML = `<span class="icon-warning"></span> ${chrome.i18n.getMessage('M_NotFound')}`;
     messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
     milestonesContainer[0].appendChild(messageBanner);
 
@@ -301,7 +315,7 @@ function buildMilestonesTab() {
   Object.keys(gameData.milestones).reverse().forEach((milestoneIndex) => {
     const milestone = gameData.milestones[milestoneIndex];
     const milestoneEntry = document.createElement('tr');
-    milestoneEntry.innerHTML = `<td>${milestone.value} ${milestone.type}</td><td>${milestone.achieved}</td>`;
+    milestoneEntry.innerHTML = `<td>${milestone.value} ${findTranslation(milestone.type)}</td><td>${milestone.achieved}</td>`;
 
     document.getElementById('milestones-table').appendChild(milestoneEntry);
   });
@@ -313,13 +327,13 @@ function buildNameChangesTab() {
   const nameChangesTable = document.createElement('table');
   nameChangesTable.classList.add('table');
   nameChangesTable.classList.add('table-striped');
-  nameChangesTable.innerHTML = '<thead><tr><th class="text-label">Name</th><th class="text-label">Changed</th></tr></thead><tbody id="name-changes-table"></tbody>';
+  nameChangesTable.innerHTML = `<thead><tr><th class="text-label">${chrome.i18n.getMessage('tableNC_Name')}</th><th class="text-label">${chrome.i18n.getMessage('tableNC_Changed')}</th></tr></thead><tbody id="name-changes-table"></tbody>`;
 
   if (!Object.keys(nameChangesGraphData).length) {
     const messageBanner = document.createElement('div');
 
     messageBanner.classList.add('message-banner');
-    messageBanner.innerHTML = `<span class="icon-warning"></span> This game has no tracked name changes`;
+    messageBanner.innerHTML = `<span class="icon-warning"></span> ${chrome.i18n.getMessage('NC_NotFound')}`;
     messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
     nameChangesContainer[0].appendChild(messageBanner);
 
@@ -327,7 +341,7 @@ function buildNameChangesTab() {
   }
   const limitWarning = document.createElement('div');
   limitWarning.classList.add('text-label');
-  limitWarning.innerHTML = 'Showing the Last 10 Name Changes';
+  limitWarning.innerHTML = chrome.i18n.getMessage('NC_LimitNote');
 
   nameChangesContainer[0].appendChild(limitWarning);
   nameChangesContainer[0].appendChild(nameChangesTable);
@@ -349,7 +363,7 @@ function buildSocialGraphTab() {
     const socialGraphMessageBanner = document.createElement('div');
 
     socialGraphMessageBanner.classList.add('message-banner');
-    socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> This game has no trackable social graph`;
+    socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> ${chrome.i18n.getMessage('socials_NotFound')}`;
     socialGraphMessageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
     socialGraphContainer[0].appendChild(socialGraphMessageBanner);
   } else {
@@ -364,7 +378,7 @@ function buildSocialGraphTab() {
   ">${item.copy}</h2>
       <p style="
       text-align: center;
-  ">${item.title}</p>`
+  ">${findTranslation(item.title)}</p>`
       flexboxContainer.appendChild(gridEntry);
     });
 

@@ -1,0 +1,196 @@
+{
+    "extName": {
+        "message": "RoMonitor Stats - Estadísticas de Roblox",
+        "description": "Extension name at manifest.json"
+    },
+
+    "extDesc": {
+       "message": "Observa analiticas de juegos de Roblox desde RoMonitor Stats dentro de Roblox",
+       "description": "Extension description at manifest.json"
+    },
+
+    "tabStats": {
+        "message": "Estadísticas",
+        "description": "New tab name"
+    },
+
+    "tabMilestones": {
+        "message": "Metas",
+        "description": "New tab name"
+    },
+
+    "tabSocialGraph": {
+        "message": "Grafo Social",
+        "description": "New tab name"
+    },
+
+    "tabNameChanges": {
+        "message": "Cambios de Nombre",
+        "description": "New tab name"
+    },
+
+    "tabRoMonitor": {
+        "message": "RoMonitor Stats",
+        "description": "New tab name"
+    },
+
+
+
+
+
+    "PoweredBy": {
+        "message": "Desarrollado por",
+        "description": "Note that appears over every new tab"
+    },
+
+
+
+
+    "contactError": {
+        "message": "Incapaz de conectarse a RoMonitor Stats",
+        "description": "Error displayed if API returns error"
+    },
+
+    "429Error": {
+        "message": "Estás enviando muchas solicitudes a RoMonitor Stats",
+        "description": "Error displayed if API returns 429"
+    },
+
+    "500Error": {
+        "message": "RoMonitor Stats tuvo un percance, nuestra herramienta de monitoreo lo ha registrado",
+        "description": "Error displayed if API returns 500"
+    },
+
+    "404Error": {
+        "message": "El endpoint de la extensión de RoMonitor Stats no está disponible",
+        "description": "Error displayed if API returns 404"
+    },
+
+    "502Error": {
+        "message": "RoMonitor Stats está actualmente en mantenimiento",
+        "description": "Error displayed if API returns 502"
+    },
+
+    "422Error": {
+        "message": "Solicitud inválida enviada a RoMonitor Stats",
+        "description": "Error displayed if API returns 422"
+    },
+
+
+
+
+    "tableM_Milestone": {
+        "message": "Meta",
+        "description": "Left title on name changes table"
+    },
+
+    "tableM_Achived": {
+        "message": "Conseguida",
+        "description": "Right title on name changes table"
+    },
+
+    "M_NotFound": {
+        "message": "Este juego no tiene metas monitoreadas",
+        "description": "Error displayed if the game doesn't have any milestones"
+    },
+
+    "Visits": {
+        "message": "Visitas",
+        "description": "Milestone text"
+    },
+
+    "Likes": {
+        "message": "Likes",
+        "description": "Milestone text"
+    },
+
+
+
+
+
+
+    "tableNC_Name": {
+        "message": "Nombre",
+        "description": "Left title on name changes table"
+    },
+
+    "tableNC_Changed": {
+        "message": "Cambiado",
+        "description": "Right title on name changes table"
+    },
+
+    "NC_NotFound": {
+        "message": "Este juego no tiene cambios de nombre monitoreados",
+        "description": "Error displayed if the game never changed its name"
+    },
+
+    "NC_LimitNote": {
+        "message": "Mostrando los Últimos 10 Cambios de Nombre",
+        "description": "Note that appears over the name changes table"
+    },
+    
+
+
+
+
+
+    "Highest_Players_Today": {
+        "message": "Máximo de Jugadores Hoy",
+        "description": "Data displayed on the stats tab"
+    },
+
+    "Avg_Players_Today": {
+        "message": "Jugadores Promedio Hoy",
+        "description": "Data displayed on the stats tab"
+    },
+
+    "Highest_Players_This_Week": {
+        "message": "Máximo de Jugadores Esta Semana",
+        "description": "Data displayed on the stats tab"
+    },
+
+    "Avg_Players_This_Week": {
+        "message": "Jugadores Promedio Esta Semana",
+        "description": "Data displayed on the stats tab"
+    },
+
+    "Rating": {
+        "message": "Calificación",
+        "description": "Data displayed on the stats tab"
+    },
+
+
+
+
+
+
+    "Global_Reach": {
+        "message": "Alcance Global",
+        "description": "Data displayed on the social tab"
+    },
+
+    "Discord_Online": {
+        "message": "En Línea en Discord",
+        "description": "Data displayed on the social tab"
+    },
+
+    "Discord_Members": {
+        "message": "Miembros en Discord",
+        "description": "Data displayed on the social tab"
+    },
+
+    "YouTube_Subscribers": {
+        "message": "Suscriptores de Youtube",
+        "description": "Data displayed on the social tab"
+    },
+
+    "YouTube_Views": {
+        "message": "Visualizaciones en Youtube",
+        "description": "Data displayed on the social tab"
+    },
+
+    "socials_NotFound": {
+        "message": "Este juego no tiene un grafo social monitoreado",
+        "description": "Error displayed if the game doesn't have any linked social media"
+    }
+}
