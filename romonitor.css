@@ -3,3 +3,9 @@
     margin: 5px;
     height: 100px;
 }
+
+.romonitor-milestone-social-item {
+    display: block;
+    margin-left: 15%;
+    margin-right: 85%;
+}
