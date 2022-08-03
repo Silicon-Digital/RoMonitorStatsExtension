@@ -297,8 +297,6 @@ function buildMilestonesTab() {
     return;
   }
 
-  console.log(gameData.milestones);
-
   milestonesContainer[0].appendChild(milestonesTable);
 
   Object.keys(gameData.milestones).reverse().forEach((milestoneIndex) => {
