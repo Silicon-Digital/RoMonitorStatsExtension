@@ -1,21 +1,39 @@
 let extensionConfiguration = {
-  apiEndpoint: 'https://romonitorstats.com/api/v1/extension/',
+  apiEndpoint: 'https://romonitorstats.com/api/v1/',
   activePlaceID: null,
+  apiExtensionEndpoint: null, 
+  apiFeaturedGamesEndpoint: null
 };
+
+extensionConfiguration.apiExtensionEndpoint = extensionConfiguration.apiEndpoint + "extension/";
+extensionConfiguration.apiFeaturedGamesEndpoint = extensionConfiguration.apiEndpoint + "stats/featured-games/get/";
 
 let loadingStore = {
   socialGraph: false,
+};
+
+let pageDictionary = {
+  noPage: 0,
+  tabs: 1,
+  home: 2
 };
 
 let gameData = null;
 let socialGraphData = null;
 let nameChangesGraphData = null;
 
-window.addEventListener('load', async function () {
-  const check = await prefabChecks();
+let homeData = null;
 
-  if (check) {
+const poweredBy = `Powered by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`
+
+window.addEventListener('load', async function () {
+  // Result of prefab check indicates which type of page we are on. 
+  const check_id = await prefabChecks();
+
+  if (check_id == pageDictionary.tabs) {
     buildTabs();
+  } else if (check_id == pageDictionary.home) {
+    buildHomeSearch();
   }
 });
 
@@ -35,50 +53,72 @@ async function prefabChecks() {
 
           gameData = data;
 
-          return true
+          // Let the caller know that we are on a tab page. 
+          return pageDictionary.tabs
         } else if (data && !data.success && data.message && data.code) {
           createRobloxError(data.message, data.icon, data.code);
         }
 
-        return false;
+        return pageDictionary.noPage;
       });
+  }
+  /** Check if we are on the home page */
+  else if (window.location.pathname.match(/\/home/)) {
+    return await getData(extensionConfiguration.apiFeaturedGamesEndpoint).then((data) => {
+      if (data) {
+        homeData = data
+
+        // Let the caller know that we are on a home page. 
+        return pageDictionary.home;
+      } 
+
+      // For the home page, if there was an error then we do nothing. 
+      return pageDictionary.noPage;
+    });
   }
 
   return false;
 }
 
+function romonitorResponseHandler(response) {
+  if (response.status === 429) {
+    this.createRobloxError("You're sending too many requests to RoMonitor Stats");
+    return;
+  } else if (response.status === 500) {
+    this.createRobloxError('RoMonitor Stats hit an exception, our monitoring tool has logged this');
+    return;
+  } else if (response.status === 404) {
+    this.createRobloxError('The RoMonitor Stats extension endpoint is not available');
+    return;
+  } else if (response.status === 502) {
+    this.createRobloxError('RoMonitor Stats is currently undergoing maintainance');
+    return;
+  } else if (response.status === 422) {
+    this.createRobloxError('Invalid request sent to RoMonitor Stats');
+    return;
+  }
+  return response.json();
+}
+
+function romonitorErrorHandler(error) {
+  this.createRobloxError('Unable to contact RoMonitor Stats');
+  Promise.reject(error);
+}
+
 async function postData(data = {}) {
-  return await fetch(extensionConfiguration.apiEndpoint + 'get', {
+  return await fetch(extensionConfiguration.apiExtensionEndpoint + 'get', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(data)
   })
-    .then(response => {
-      if (response.status === 429) {
-        this.createRobloxError("You're sending too many requests to RoMonitor Stats");
-        return;
-      } else if (response.status === 500) {
-        this.createRobloxError('RoMonitor Stats hit an exception, our monitoring tool has logged this');
-        return;
-      } else if (response.status === 404) {
-        this.createRobloxError('The RoMonitor Stats extension endpoint is not available');
-        return;
-      } else if (response.status === 502) {
-        this.createRobloxError('RoMonitor Stats is currently undergoing maintainance');
-        return;
-      } else if (response.status === 422) {
-        this.createRobloxError('Invalid request sent to RoMonitor Stats');
-        return;
-      }
+    .then((response) => romonitorResponseHandler(response))
+    .catch((error) => romonitorErrorHandler(error));
+}
 
-      return response.json();
-    })
-    .catch((error) => {
-      this.createRobloxError('Unable to contact RoMonitor Stats');
-      Promise.reject(error);
-    });
+async function getData(uri) {
+  return await fetch(uri, ).then((response) => romonitorResponseHandler(response)).catch((error) => romonitorErrorHandler(error))
 }
 
 function createRobloxError(message, icon = 'icon-warning', code = null) {
@@ -155,7 +195,8 @@ function buildTabs() {
 
       const containerHeader = document.createElement('div');
       containerHeader.classList.add('container-header');
-      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">Powered by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a></div>`;
+      const poweredByHtml = 
+      containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">${poweredBy}</div>`;
       firstTabContent.appendChild(containerHeader);
     }
 
@@ -374,4 +415,191 @@ function buildSocialGraphTab() {
 
     socialGraphContainer[0].appendChild(flexboxContainer);
   }
+}
+
+function buildHomeSearch() {
+  let container;
+  
+  // Perform a bunch of checks here to make sure the 
+  // HTML looks like it is expected, to avoid extension breaking/doing 
+  // weird things if webpage is updated in the future. 
+  {
+    let place_list = document.getElementById("place-list");
+
+    if (!place_list) {
+      return;
+    }
+    
+    container = place_list.getElementsByClassName("game-home-page-container");
+  }
+
+  if (container.length != 1) {
+    return;
+  }
+  container = container[0]
+  if (container.nodeName != "DIV") {
+    return;
+  }
+
+  // Once the search/carousel container is found, add our new search to the page. 
+  container.insertBefore(buildCarousel(), container.children.item(2));
+  container.insertBefore(buildHomePageTitle("Top Experiences", "https://romonitorstats.com/"), container.children.item(2));
+
+  // Function puts the title/search in the correct place on the page. 
+  updateHomePage(container);
+
+  // Unfortunately since the DOM does not load consistently, sometimes the insertion happens 
+  // before the other searches have loaded. To combat this, we add a MutationObserver which 
+  // removes and adds the carousel/title every time the children of the container are updated
+  // to ensure that our title/carousel is always in the same place. 
+  const config = {
+    childList: true 
+  };
+
+  const callback = function(mutations, observer) {
+      const container = document.getElementById("place-list").getElementsByClassName("game-home-page-container")[0];
+      const config = {
+        childList: true 
+      };
+
+      observer.disconnect();
+      updateHomePage(container);
+      observer.observe(container, config);
+  }
+
+  const observer = new MutationObserver(callback); 
+  observer.observe(container, config);
+}
+
+// Simply refreshes the page with our new element in a consistent location. 
+function updateHomePage(container) {
+  const title = document.getElementById("romonitor-title");
+  const search = document.getElementById("romonitor-search");
+
+  if (title) {
+    container.removeChild(title);
+  }
+  if (search) {
+    container.removeChild(search)
+  }
+  if (search) {
+    container.insertBefore(search, container.children.item(2));
+  }
+  if (title) {
+    container.insertBefore(title, container.children.item(2));
+  }
+  
+
+}
+
+function buildHomePageTitle(title, href) {
+  let newTitle = document.createElement("div");
+  newTitle.className = 'container-header';
+  newTitle.innerHTML = `<h2>
+                          <a href="${href}">
+                            ${title} 
+                          </a>
+                        </h2>
+                        <div class="btn-secondary-xs see-all-link-icon btn-more">
+                          ${poweredBy}
+                        </div>`;
+  newTitle.id = "romonitor-title";
+  return newTitle;
+}
+
+function buildCarousel() {
+  let newCarousel = document.createElement("div");
+  newCarousel.setAttribute("class", "game-carousel")
+  newCarousel.setAttribute("data-testid", "game-game-carousel")
+  newCarousel.id = "romonitor-search"
+
+  // We loop just to make sure that the API has actually given us data
+  const dataAry = [];
+  let i = 0;
+  while (homeData.length > i && i < 6) {
+    dataAry.push(homeData[i]); 
+    i++;
+  }
+
+  dataAry.forEach((game) => {
+    newCarousel.appendChild(buildGameCard(
+      "https://www.roblox.com/games/" + game.placeId, game.placeId, game.name, fixPercentage(game.rating), fixPlayCount(game.playing), game.icon
+    ));
+  });
+
+
+  return newCarousel;
+} 
+
+function buildGameCard(href, id, title, votePercentage, playerCount, imgRef) {
+  // Build the card up from elements that reflect the HTMl on the home page. 
+  // Class attributes are used for consistency with the home page. 
+  let cardContainer = document.createElement("div");
+  cardContainer.setAttribute("class", "grid-item-container game-card-container");
+  cardContainer.setAttribute("data-testid", "game-title");
+
+  let anchor = document.createElement("a");
+  cardContainer.appendChild(anchor);
+
+  anchor.setAttribute("class", "game-card-link");
+  anchor.setAttribute("href", `${href}`)
+  anchor.setAttribute("id", `${id}`)
+
+  let anchorChildren = [
+    document.createElement("span"), // Image Holder
+    document.createElement("div"), // Game Title
+    document.createElement("div") // stats stuff
+  ]
+  anchorChildren.forEach((child) => anchor.appendChild(child));
+
+  // Add the child image tag for the span. 
+  const img = document.createElement("img");
+  img.setAttribute("src", imgRef);
+  img.setAttribute("alt", title);
+  img.setAttribute("title", title);
+  anchorChildren[0].appendChild(img);
+
+  anchorChildren[0].setAttribute("class", "thumbnail-2d-container shimmer game-card-thumb-container");
+  anchorChildren[1].setAttribute("class", "game-card-name game-name-title");
+  anchorChildren[1].setAttribute("title", `${title}`);
+  anchorChildren[1].innerHTML = title;
+  anchorChildren[2].setAttribute("class", "game-card-info");
+  anchorChildren[2].setAttribute("data-testid", "game-tile-stats");
+
+  let cardInfoChildren = [
+    document.createElement("span"), // votePercentageIcon 
+    document.createElement("span"), // votePercentage 
+    document.createElement("span"), // playCountIcon 
+    document.createElement("span")  // playCount 
+  ]
+  cardInfoChildren.forEach((child) => anchorChildren[2].appendChild(child));
+
+  cardInfoChildren[0].setAttribute("class", "info-label icon-votes-gray");
+  cardInfoChildren[1].setAttribute("class", "info-label vote-percentage-label");
+  cardInfoChildren[1].innerHTML = votePercentage; 
+  cardInfoChildren[2].setAttribute("class", "info-label icon-playing-counts-gray");
+  cardInfoChildren[3].setAttribute("class", "info-label playing-counts-label");
+  cardInfoChildren[3].innerHTML = playerCount; 
+
+
+  return cardContainer;
+}
+
+// Roblox home page has play count with k's, for example 1000 would be 1k. 
+// Use this function to convert from an int to the required string version. 
+function fixPlayCount(count) {
+  if (count < 1000) {
+    return toString(count);
+  } 
+  else if (count < 1000000) {
+    return (Math.round(10 * count / 1000) / 10).toString() + "k"
+  } 
+  else {
+    return (Math.round(10 * count / 1000000) / 10).toString() + "m"
+  }
+}
+
+// Convert the 0-100 number to a percentage formatted in the same was as on the home page.
+function fixPercentage(percentage) {
+  return Math.round(percentage).toString() + "%"
 }
