@@ -17,6 +17,8 @@
         "*://*.roblox.com/games/*",
         "*://*.roblox.com/users/*",
         "*://*.roblox.com/groups/*",
+        "*://*.roblox.com/home*",
+        "*://*.roblox.com/discover*",
         "https://romonitorstats.com/api/v1/extension/*"
       ]
     }
