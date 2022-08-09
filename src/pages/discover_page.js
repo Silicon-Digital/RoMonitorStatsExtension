@@ -1,4 +1,4 @@
-import common from './common'
+import common from '../common'
 
 let discoverConfig = {
     data: null,
@@ -80,7 +80,7 @@ function buildGameListContainer() {
     container.setAttribute("data-testid", "game-carousel-games-container");
     container.className = "games-list-container"
 
-    container.appendChild(buildHeader("Top Experiences", "/"));
+    container.appendChild(buildHeader(common.getText("Top_Experiences"),"/"));
     container.appendChild(buildList());
     
     return container;

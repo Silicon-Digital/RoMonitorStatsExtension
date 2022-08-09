@@ -1,4 +1,5 @@
-import common from './common'
+import common from '../common'
+
 
 let gameConfig = {
     activePlaceID: null,
@@ -47,23 +48,23 @@ async function getGame() {
 function getTabs() {
     return [
         {
-            title: 'Stats',
+            title: common.getText("tabStats"),
             id: 'stats',
         },
         {
-            title: 'Milestones',
+            title: common.getText('tabMilestones'),
             id: 'milestones',
         },
         {
-            title: 'Social Graph',
+            title: common.getText('tabSocialGraph'),
             id: 'social-graph',
         },
         {
-            title: 'Name Changes',
+            title: common.getText('tabNameChanges'),
             id: 'name-changes',
         },
         {
-            title: 'RoMonitor Stats',
+            title: common.getText('tabRoMonitor'),
             id: 'go-to-stats',
             href: `https://romonitorstats.com/experience/${gameConfig.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
             target: '_blank',
@@ -114,9 +115,9 @@ function buildTabs() {
         }
 
         /** The following are lightweight queries to our servers, so we build these to make the tabs load faster, others are dynamically injected. */
-        if (tab.title === 'Milestones') {
+        if (tab.title === common.getText('Milestones')) {
             buildMilestonesTab();
-        } else if (tab.title === 'Stats') {
+        } else if (tab.title === common.getText('Stats')) {
             buildStatsTab();
         }
 
@@ -227,7 +228,7 @@ function buildStatsTab() {
                                     ">${item.copy}</h2>
                                     <p style="
                                        text-align: center;
-                                        ">${item.title}</p>`
+                                        ">${common.findTranslation(item.title)}</p>`
         flexboxContainer.appendChild(gridEntry);
     });
 
@@ -239,13 +240,13 @@ function buildMilestonesTab() {
     const milestonesTable = document.createElement('table');
     milestonesTable.classList.add('table');
     milestonesTable.classList.add('table-striped');
-    milestonesTable.innerHTML = '<thead><tr><th class="text-label">Milestone</th><th class="text-label">Achived</th><th class="text-label">Tweets</th></tr></thead><tbody id="milestones-table"></tbody>';
+    milestonesTable.innerHTML = `<thead><tr><th class="text-label">${common.getText(`tableM_Milestone`)}</th><th class="text-label">${common.getText("tableM_Achived")}</th><th class="text-label">Tweets</th></tr></thead><tbody id="milestones-table"></tbody>`;
 
     if (!Object.keys(gameConfig.data.milestones).length) {
         const messageBanner = document.createElement('div');
 
         messageBanner.classList.add('message-banner');
-        messageBanner.innerHTML = `<span class="icon-warning"></span> This game has no tracked milestones`;
+        messageBanner.innerHTML = `<span class="icon-warning"></span> ${common.getText(`M_NotFound`)}`;
         messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
         milestonesContainer[0].appendChild(messageBanner);
 
@@ -260,7 +261,7 @@ function buildMilestonesTab() {
 
         const svg = `<a href="${milestone.tweet}" target="_blank"><svg class="romonitor-milestone-social-item" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#1DA1F2" d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a></div>`
 
-        milestoneEntry.innerHTML = `<td>${milestone.value} ${milestone.type}</td><td>${milestone.achieved}</td><td class="romonitor-tableitem">${svg}</td>`;
+        milestoneEntry.innerHTML = `<td>${milestone.value} ${common.findTranslation(milestone.type)}</td><td>${milestone.achieved}</td><td class="romonitor-tableitem">${svg}</td>`;
 
         document.getElementById('milestones-table').appendChild(milestoneEntry);
     });
@@ -272,13 +273,13 @@ function buildNameChangesTab() {
   const nameChangesTable = document.createElement('table');
   nameChangesTable.classList.add('table');
   nameChangesTable.classList.add('table-striped');
-  nameChangesTable.innerHTML = '<thead><tr><th class="text-label">Name</th><th class="text-label">Changed</th></tr></thead><tbody id="name-changes-table"></tbody>';
+  nameChangesTable.innerHTML = `<thead><tr><th class="text-label">${common.getText(`tableNC_Name`)}</th><th class="text-label">${common.getText(`tableNC_Changed`)}</th></tr></thead><tbody id="name-changes-table"></tbody>`;
 
   if (!Object.keys(nameChangesGraphData).length) {
     const messageBanner = document.createElement('div');
 
     messageBanner.classList.add('message-banner');
-    messageBanner.innerHTML = `<span class="icon-warning"></span> This game has no tracked name changes`;
+    messageBanner.innerHTML = `<span class="icon-warning"></span> ${common.getText(`NC_NotFound`)}`;
     messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
     nameChangesContainer[0].appendChild(messageBanner);
 
@@ -286,7 +287,7 @@ function buildNameChangesTab() {
   }
   const limitWarning = document.createElement('div');
   limitWarning.classList.add('text-label');
-  limitWarning.innerHTML = 'Showing the Last 10 Name Changes';
+  limitWarning.innerHTML = common.getText(`NC_LimitNote`);
 
   nameChangesContainer[0].appendChild(limitWarning);
   nameChangesContainer[0].appendChild(nameChangesTable);
@@ -308,7 +309,7 @@ function buildSocialGraphTab() {
     const socialGraphMessageBanner = document.createElement('div');
 
     socialGraphMessageBanner.classList.add('message-banner');
-    socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> This game has no trackable social graph`;
+    socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> ${socials_NotFound}`;
     socialGraphMessageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
     socialGraphContainer[0].appendChild(socialGraphMessageBanner);
   } else {
@@ -323,7 +324,7 @@ function buildSocialGraphTab() {
   ">${item.copy}</h2>
       <p style="
       text-align: center;
-  ">${item.title}</p>`
+  ">${findTranslation(item.title)}</p>`
       flexboxContainer.appendChild(gridEntry);
     });
 

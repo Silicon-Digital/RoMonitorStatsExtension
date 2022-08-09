@@ -1,26 +1,27 @@
+let common;
 
 function romonitorResponseHandler(response) {
     if (response.status === 429) {
-        this.createRobloxError("You're sending too many requests to RoMonitor Stats");
+        this.createRobloxError(common.getMessage(`429Error`));
         return;
     } else if (response.status === 500) {
-        this.createRobloxError('RoMonitor Stats hit an exception, our monitoring tool has logged this');
+        this.createRobloxError(common.getMessage(`500Error`));
         return;
     } else if (response.status === 404) {
-        this.createRobloxError('The RoMonitor Stats extension endpoint is not available');
+        this.createRobloxError(common.getMessage(`404Error`));
         return;
     } else if (response.status === 502) {
-        this.createRobloxError('RoMonitor Stats is currently undergoing maintainance');
+        this.createRobloxError(common.getMessage(`502Error`));
         return;
     } else if (response.status === 422) {
-        this.createRobloxError('Invalid request sent to RoMonitor Stats');
+        this.createRobloxError(common.getMessage('422Error'));
         return;
     }
     return response.json();
 }
 
 function romonitorErrorHandler(error) {
-    createRobloxError('Unable to contact RoMonitor Stats');
+    createRobloxError(common.getMessage(`contactError`));
     Promise.reject(error);
 }
 
@@ -36,11 +37,9 @@ function createRobloxError(message, icon = 'icon-warning', code = null) {
 
 let config = {
     apiEndpoint: 'https://romonitorstats.com/api/v1/',
-    poweredBy: `Powered by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
-    poweredByText: `Powered by RoMonitor Stats`
+    poweredBy: `${common.getMessage('PoweredBy')} by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
+    poweredByText: `${common.getMessage('PoweredBy')} RoMonitor Stats`
 }
-
-let common;
 
 common = {
     config: config,
@@ -84,6 +83,23 @@ common = {
     async getDiscoverData() {
         return await common.getData(config.apiEndpoint + "stats/featured-games/get/")
             
+    },
+
+    // Used to get the text for display. Use function to add functionality for firefox later. 
+    getText(textId) {
+        console.log(navigator.languages[0])
+        console.log(chrome.i18n.getMessage(textId));
+        return chrome.i18n.getMessage(textId);
+    },
+    findTranslation(str) {
+        var replaced = str.split(' ').join('_');
+        var translation = chrome.i18n.getMessage(replaced);
+      
+        if (translation != '') {
+          return translation
+        } else {
+          return str
+        }
     }
 
 }

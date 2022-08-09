@@ -1,4 +1,4 @@
-import common from './common'
+import common from '../common'
 
 let config = common.config;
 let homeConfig = {
@@ -45,7 +45,7 @@ function buildHomeSearch() {
 
     // Once the search/carousel container is found, add our new search to the page. 
     container.insertBefore(buildCarousel(), container.children.item(2));
-    container.insertBefore(buildHomePageTitle("Top Experiences", "https://romonitorstats.com/"), container.children.item(2));
+    container.insertBefore(buildHomePageTitle(common.getText('Top_Experiences'), "https://romonitorstats.com/"), container.children.item(2));
 
     // Function puts the title/search in the correct place on the page. 
     updateHomePage(container);
