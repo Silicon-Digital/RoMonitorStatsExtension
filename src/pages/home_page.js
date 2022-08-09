@@ -8,7 +8,6 @@ let homeConfig = {
 
 export default {
     extendPage: async function () {
-        console.log(common);
         await common.getDiscoverData().then(
             (data) => {
                 homeConfig.data = data;

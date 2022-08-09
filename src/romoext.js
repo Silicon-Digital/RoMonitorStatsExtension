@@ -11,7 +11,6 @@ let pageEnum = {
 }
 
 window.addEventListener('load', async function () {
-    console.log("here");
     // Result of prefab check indicates which type of page we are on. 
     const check_id = checkPage();
 
@@ -32,7 +31,7 @@ function checkPage() {
         return pageEnum.game;
     } else if (path.match(/\/home/)) {
         return pageEnum.home;
-    } else if (path.match(/\/discover#\//)) {
+    } else if (path.match(/\/discover/)) {
         return pageEnum.discover;
     }
     return pageEnum.noPage;

@@ -36,7 +36,8 @@ function createRobloxError(message, icon = 'icon-warning', code = null) {
 
 let config = {
     apiEndpoint: 'https://romonitorstats.com/api/v1/',
-    poweredBy: `Powered by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`
+    poweredBy: `Powered by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
+    poweredByText: `Powered by RoMonitor Stats`
 }
 
 let common;
