@@ -1,0 +1,37 @@
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 300px;
+    padding: 5px;
+    flex-shrink: 2;
+}
+
+.title-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-content: center;
+    align-items: center;
+}
+
+.label-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    gap: 5px;
+}
+
+.back-button {
+    width: 100px;
+    margin: 10px;
+}
+
+.homepage-settings-page .discover-settings-page .gamepage-settings-page {
+   display: none;
+}
+
+
+

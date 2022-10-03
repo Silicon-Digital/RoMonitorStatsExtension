@@ -15,13 +15,19 @@ let current = 0;
 
 export default {
     extendDiscover: async function () {
-        await common.getDiscoverData().then(
-            (data) => {
-                discoverConfig.data = data;
-            }
-        );
 
-        buildDiscoverSearch();
+        let options = await chrome.storage.sync.get({discoverTopExperiencesDisplayed: true});
+
+        if (options.discoverTopExperiencesDisplayed) {
+            await common.getDiscoverData().then(
+                (data) => {
+                    discoverConfig.data = data;
+                }
+            );
+
+            buildDiscoverSearch();
+        }
+
     }
 }
 

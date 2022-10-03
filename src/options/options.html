@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RoMonitor Stats Extension Options</title>
+    <link rel="stylesheet" href="options.css"/>
+</head>
+<body>
+
+<div id="general-settings-page">
+    <div class="container">
+        <div class="">
+            <button id="btn-home-page-settings">Home Page Settings</button>
+        </div>
+        <div>
+            <button id="btn-discover-page-settings">Discover Page Settings</button>
+        </div>
+        <div>
+            <button id="btn-game-page-settings">Game Page Settings</button>
+        </div>
+    </div>
+</div>
+
+<div id="homepage-settings-page" class="settings-page" style="display: none;">
+
+    <div class="title-container">
+        <button class="back-button">
+            Back
+        </button>
+        <div style="text-align: center;">
+            Home Page Settings
+        </div>
+    </div>
+
+    <label>
+        Display Top Experiences
+        <input type="checkbox" id="homeTopExperiencesDisplayed">
+    </label>
+
+</div>
+
+<div id="discover-settings-page" class="settings-page" style="display: none;">
+    <div class="title-container">
+        <button class="back-button">
+            Back
+        </button>
+        <h4 style="text-align: center;">
+            Discover Page Settings
+        </h4>
+    </div>
+
+    <label>
+        Display Top Experiences
+        <input type="checkbox" id="discoverTopExperiencesDisplayed">
+    </label>
+
+</div>
+
+<div id="game-page-settings-page" class="settings-page" style="display: none;">
+
+    <div class="title-container">
+        <button class="back-button">
+            Back
+        </button>
+        <div style="text-align: center;">
+            Game Page Settings
+        </div>
+    </div>
+
+    <div class="label-container">
+
+        <label>
+            Display Stats
+            <input type="checkbox" id="gameStatsDisplayed">
+        </label>
+
+        <label>
+            Display Milestones
+            <input type="checkbox" id="gameMilestonesDisplayed">
+        </label>
+
+        <label>
+            Display Social Graph
+            <input type="checkbox" id="gameSocialGraphDisplayed">
+        </label>
+
+        <label>
+            Display Name Changes
+            <input type="checkbox" id="gameNameChangesDisplayed">
+        </label>
+
+        <label>
+            Display RoMonitor Stats Link
+            <input type="checkbox" id="gameRoMonitorStatsDisplayed">
+        </label>
+
+    </div>
+</div>
+
+
+<!--Favorite color:-->
+<!--<select id="color">-->
+<!--    <option value="red">red</option>-->
+<!--    <option value="green">green</option>-->
+<!--    <option value="blue">blue</option>-->
+<!--    <option value="yellow">yellow</option>-->
+<!--</select>-->
+
+<!--<label>-->
+<!--    <input type="checkbox" id="like">-->
+<!--    I like colors.-->
+<!--</label>-->
+
+<!--<div id="status"></div>-->
+<!--<button id="save">Save</button>-->
+
+<script src="options.js"></script>
+</body>
+</html>

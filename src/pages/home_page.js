@@ -8,13 +8,19 @@ let homeConfig = {
 
 export default {
     extendPage: async function () {
-        await common.getDiscoverData().then(
-            (data) => {
-                homeConfig.data = data;
-            }
-        );
 
-        buildHomeSearch();
+        let options = await chrome.storage.sync.get({homeTopExperiencesDisplayed: true});
+
+        if (options.homeTopExperiencesDisplayed) {
+            await common.getDiscoverData().then(
+                (data) => {
+                    homeConfig.data = data;
+                }
+            );
+
+            buildHomeSearch();
+        }
+
     }
 }
 

@@ -19,63 +19,83 @@ export default {
     extendGame: async function () {
         await getGame();
 
-        buildTabs();
+        await buildTabs();
     }
 }
 
 // Get the data from API that is relevant the game page we are on. 
 async function getGame() {
     gameConfig.activePlaceID = document.querySelector("#game-detail-page").dataset.placeId;
-    return await common.postData({ game: gameConfig.activePlaceID }, gameConfig.apiExtension)
+    return await common.postData({game: gameConfig.activePlaceID}, gameConfig.apiExtension)
         .then((data) => {
             if (data && data.success) {
-                const tabFixCss = '.rbx-tab { width: 25% !important };';
-                const styleElement = document.createElement('style');
-                document.head.appendChild(styleElement);
-                styleElement.type = 'text/css';
-                styleElement.appendChild(document.createTextNode(tabFixCss));
 
                 gameConfig.data = data;
 
-            }
-            else if (data && data.success && data.message && data.code) {
+            } else if (data && data.success && data.message && data.code) {
                 common.createRobloxError(data.message, data.icon, data.code);
             }
 
         });
 }
 
-function getTabs() {
-    return [
-        {
-            title: common.getText("tabStats"),
-            id: 'stats',
-        },
-        {
+async function getTabs() {
+    let options = await chrome.storage.sync.get({
+        gameStatsDisplayed: true,
+        gameMilestonesDisplayed: true,
+        gameSocialGraphDisplayed: true,
+        gameRoMonitorStatsDisplayed: true,
+        gameNameChangesDisplayed: true
+    })
+
+    const tabs = [];
+
+    if (options.gameStatsDisplayed) {
+        tabs.push(
+            {
+                title: common.getText("tabStats"),
+                id: 'stats',
+            }
+        )
+    }
+
+    if (options.gameMilestonesDisplayed) {
+        tabs.push({
             title: common.getText('tabMilestones'),
             id: 'milestones',
-        },
-        {
+        })
+    }
+
+    if (options.gameSocialGraphDisplayed) {
+        tabs.push({
             title: common.getText('tabSocialGraph'),
             id: 'social-graph',
-        },
-        {
+        })
+    }
+
+    if (options.gameNameChangesDisplayed) {
+        tabs.push({
             title: common.getText('tabNameChanges'),
             id: 'name-changes',
-        },
-        {
+        })
+    }
+
+    if (options.gameRoMonitorStatsDisplayed) {
+        tabs.push({
             title: common.getText('tabRoMonitor'),
             id: 'go-to-stats',
             href: `https://romonitorstats.com/experience/${gameConfig.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
             target: '_blank',
-        }
-    ];
+        })
+    }
+
+    return tabs;
 }
 
-function buildTabs() {
+async function buildTabs() {
     lastAddedTab = null;
 
-    getTabs().forEach((tab) => {
+    (await getTabs()).forEach((tab) => {
         var gameNavigationTabs = document.getElementById("horizontal-tabs");
         var newTab = gameNavigationTabs.lastElementChild.cloneNode(true);
         var tabTitle = newTab.getElementsByClassName('text-lead')[0];
@@ -109,15 +129,14 @@ function buildTabs() {
 
             const containerHeader = document.createElement('div');
             containerHeader.classList.add('container-header');
-            const poweredByHtml =
-                containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">${common.poweredBy}</div>`;
+            containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">${common.config.poweredBy}</div>`;
             firstTabContent.appendChild(containerHeader);
         }
 
         /** The following are lightweight queries to our servers, so we build these to make the tabs load faster, others are dynamically injected. */
-        if (tab.title === common.getText('Milestones')) {
+        if (tab.title === common.getText('tabMilestones')) {
             buildMilestonesTab();
-        } else if (tab.title === common.getText('Stats')) {
+        } else if (tab.title === common.getText('tabStats')) {
             buildStatsTab();
         }
 
@@ -126,13 +145,22 @@ function buildTabs() {
         }
     });
 
-    /** Adds event listeners to the default Roblox tabs */
-    const baseRobloxTabs = ['about', 'store', 'game-instances'];
-    baseRobloxTabs.forEach((tab) => {
-        const tabElement = document.getElementById(`tab-${tab}`);
+    if (lastAddedTab != null) {
+        const tabFixCss = '.rbx-tab { width: 25% !important };';
+        const styleElement = document.createElement('style');
+        document.head.appendChild(styleElement);
+        styleElement.type = 'text/css';
+        styleElement.appendChild(document.createTextNode(tabFixCss));
 
-        addTabListener(tabElement, document.getElementById(tab));
-    });
+
+        /** Adds event listeners to the default Roblox tabs */
+        const baseRobloxTabs = ['about', 'store', 'game-instances'];
+        baseRobloxTabs.forEach((tab) => {
+            const tabElement = document.getElementById(`tab-${tab}`);
+
+            addTabListener(tabElement, document.getElementById(tab));
+        });
+    }
 }
 
 function addTabListener(tab, aboutContent) {
@@ -170,7 +198,7 @@ function addTabListener(tab, aboutContent) {
                 tab.id = 'nameChanges';
             }
 
-            common.postData({ game: gameConfig.activePlaceID, tab: tab.id }, gameConfig.apiExtension)
+            common.postData({game: gameConfig.activePlaceID, tab: tab.id}, gameConfig.apiExtension)
                 .then((data) => {
                     if (data.success) {
                         if (tab.id === 'socialGraph') {
@@ -223,12 +251,12 @@ function buildStatsTab() {
     gameConfig.data.stats.items.forEach((item) => {
         const gridEntry = document.createElement('div');
         gridEntry.classList.add('romonitor-grid-item');
-        gridEntry.innerHTML =  `<h2 style="
+        gridEntry.innerHTML = `<h2 style="
                                     text-align: center;
                                     ">${item.copy}</h2>
                                     <p style="
                                        text-align: center;
-                                        ">${common.findTranslation(item.title)}</p>`
+                                        ">${item.title}</p>`
         flexboxContainer.appendChild(gridEntry);
     });
 
@@ -261,74 +289,74 @@ function buildMilestonesTab() {
 
         const svg = `<a href="${milestone.tweet}" target="_blank"><svg class="romonitor-milestone-social-item" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#1DA1F2" d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a></div>`
 
-        milestoneEntry.innerHTML = `<td>${milestone.value} ${common.findTranslation(milestone.type)}</td><td>${milestone.achieved}</td><td class="romonitor-tableitem">${svg}</td>`;
+        milestoneEntry.innerHTML = `<td>${milestone.value} ${milestone.type}</td><td>${milestone.achieved}</td><td class="romonitor-tableitem">${svg}</td>`;
 
         document.getElementById('milestones-table').appendChild(milestoneEntry);
     });
 }
 
 function buildNameChangesTab() {
-  document.getElementById('name-changes-loader').remove();
-  const nameChangesContainer = document.getElementsByClassName('tab-pane name-changes');
-  const nameChangesTable = document.createElement('table');
-  nameChangesTable.classList.add('table');
-  nameChangesTable.classList.add('table-striped');
-  nameChangesTable.innerHTML = `<thead><tr><th class="text-label">${common.getText(`tableNC_Name`)}</th><th class="text-label">${common.getText(`tableNC_Changed`)}</th></tr></thead><tbody id="name-changes-table"></tbody>`;
+    document.getElementById('name-changes-loader').remove();
+    const nameChangesContainer = document.getElementsByClassName('tab-pane name-changes');
+    const nameChangesTable = document.createElement('table');
+    nameChangesTable.classList.add('table');
+    nameChangesTable.classList.add('table-striped');
+    nameChangesTable.innerHTML = `<thead><tr><th class="text-label">${common.getText(`tableNC_Name`)}</th><th class="text-label">${common.getText(`tableNC_Changed`)}</th></tr></thead><tbody id="name-changes-table"></tbody>`;
 
-  if (!Object.keys(nameChangesGraphData).length) {
-    const messageBanner = document.createElement('div');
+    if (!Object.keys(nameChangesGraphData).length) {
+        const messageBanner = document.createElement('div');
 
-    messageBanner.classList.add('message-banner');
-    messageBanner.innerHTML = `<span class="icon-warning"></span> ${common.getText(`NC_NotFound`)}`;
-    messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
-    nameChangesContainer[0].appendChild(messageBanner);
+        messageBanner.classList.add('message-banner');
+        messageBanner.innerHTML = `<span class="icon-warning"></span> ${common.getText(`NC_NotFound`)}`;
+        messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+        nameChangesContainer[0].appendChild(messageBanner);
 
-    return;
-  }
-  const limitWarning = document.createElement('div');
-  limitWarning.classList.add('text-label');
-  limitWarning.innerHTML = common.getText(`NC_LimitNote`);
+        return;
+    }
+    const limitWarning = document.createElement('div');
+    limitWarning.classList.add('text-label');
+    limitWarning.innerHTML = common.getText(`NC_LimitNote`);
 
-  nameChangesContainer[0].appendChild(limitWarning);
-  nameChangesContainer[0].appendChild(nameChangesTable);
+    nameChangesContainer[0].appendChild(limitWarning);
+    nameChangesContainer[0].appendChild(nameChangesTable);
 
-  Object.keys(nameChangesGraphData).reverse().forEach((changeIndex) => {
-    const nameChange = nameChangesGraphData[changeIndex];
-    const changeEntry = document.createElement('tr');
-    changeEntry.innerHTML = `<td>${nameChange.name}</td><td>${nameChange.changed}</td>`;
+    Object.keys(nameChangesGraphData).reverse().forEach((changeIndex) => {
+        const nameChange = nameChangesGraphData[changeIndex];
+        const changeEntry = document.createElement('tr');
+        changeEntry.innerHTML = `<td>${nameChange.name}</td><td>${nameChange.changed}</td>`;
 
-    document.getElementById('name-changes-table').appendChild(changeEntry);
-  });
+        document.getElementById('name-changes-table').appendChild(changeEntry);
+    });
 }
 
 function buildSocialGraphTab() {
-  document.getElementById('social-graph-loader').remove();
-  const socialGraphContainer = document.getElementsByClassName('tab-pane social-graph');
+    document.getElementById('social-graph-loader').remove();
+    const socialGraphContainer = document.getElementsByClassName('tab-pane social-graph');
 
-  if (!socialGraphData.items) {
-    const socialGraphMessageBanner = document.createElement('div');
+    if (!socialGraphData.items) {
+        const socialGraphMessageBanner = document.createElement('div');
 
-    socialGraphMessageBanner.classList.add('message-banner');
-    socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> ${socials_NotFound}`;
-    socialGraphMessageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
-    socialGraphContainer[0].appendChild(socialGraphMessageBanner);
-  } else {
-    const flexboxContainer = document.createElement('div');
+        socialGraphMessageBanner.classList.add('message-banner');
+        socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> ${socials_NotFound}`;
+        socialGraphMessageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+        socialGraphContainer[0].appendChild(socialGraphMessageBanner);
+    } else {
+        const flexboxContainer = document.createElement('div');
 
-    flexboxContainer.style = 'display: flex; flex-wrap: wrap;';
-    socialGraphData.items.forEach((item) => {
-      const gridEntry = document.createElement('div');
-      gridEntry.classList.add('romonitor-grid-item');
-      gridEntry.innerHTML = `<h2 style="
+        flexboxContainer.style = 'display: flex; flex-wrap: wrap;';
+        socialGraphData.items.forEach((item) => {
+            const gridEntry = document.createElement('div');
+            gridEntry.classList.add('romonitor-grid-item');
+            gridEntry.innerHTML = `<h2 style="
       text-align: center;
   ">${item.copy}</h2>
       <p style="
       text-align: center;
-  ">${findTranslation(item.title)}</p>`
-      flexboxContainer.appendChild(gridEntry);
-    });
+  ">${item.title}</p>`
+            flexboxContainer.appendChild(gridEntry);
+        });
 
-    socialGraphContainer[0].appendChild(flexboxContainer);
-  }
+        socialGraphContainer[0].appendChild(flexboxContainer);
+    }
 }
 

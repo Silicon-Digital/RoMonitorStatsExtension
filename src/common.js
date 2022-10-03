@@ -1,44 +1,12 @@
-let common;
-
-function romonitorResponseHandler(response) {
-    if (response.status === 429) {
-        this.createRobloxError(common.getMessage(`429Error`));
-        return;
-    } else if (response.status === 500) {
-        this.createRobloxError(common.getMessage(`500Error`));
-        return;
-    } else if (response.status === 404) {
-        this.createRobloxError(common.getMessage(`404Error`));
-        return;
-    } else if (response.status === 502) {
-        this.createRobloxError(common.getMessage(`502Error`));
-        return;
-    } else if (response.status === 422) {
-        this.createRobloxError(common.getMessage('422Error'));
-        return;
-    }
-    return response.json();
-}
-
-function romonitorErrorHandler(error) {
-    createRobloxError(common.getMessage(`contactError`));
-    Promise.reject(error);
-}
-
-function createRobloxError(message, icon = 'icon-warning', code = null) {
-    const tabContainer = document.getElementsByClassName('col-xs-12 rbx-tabs-horizontal')[0];
-    const messageBanner = document.createElement('div');
-
-    messageBanner.classList.add('message-banner');
-    messageBanner.innerHTML = `<span class="${icon}"></span> ${message}`;
-    messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
-    tabContainer.insertBefore(messageBanner, tabContainer.firstChild);
-}
-
 let config = {
     apiEndpoint: 'https://romonitorstats.com/api/v1/',
-    poweredBy: `${common.getMessage('PoweredBy')} by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
-    poweredByText: `${common.getMessage('PoweredBy')} RoMonitor Stats`
+    poweredBy: `${getText('PoweredBy')} by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
+    poweredByText: `${getText('PoweredBy')} RoMonitor Stats`
+};
+
+let common;
+function getText(textId) {
+    return chrome.i18n.getMessage(textId);
 }
 
 common = {
@@ -87,15 +55,13 @@ common = {
 
     // Used to get the text for display. Use function to add functionality for firefox later. 
     getText(textId) {
-        console.log(navigator.languages[0])
-        console.log(chrome.i18n.getMessage(textId));
         return chrome.i18n.getMessage(textId);
     },
     findTranslation(str) {
-        var replaced = str.split(' ').join('_');
-        var translation = chrome.i18n.getMessage(replaced);
-      
-        if (translation != '') {
+        const replaced = str.split(' ').join('_');
+        const translation = chrome.i18n.getText(replaced);
+
+        if (translation !== '') {
           return translation
         } else {
           return str
@@ -103,6 +69,44 @@ common = {
     }
 
 }
+
+function romonitorResponseHandler(response) {
+    if (response.status === 429) {
+        this.createRobloxError(common.getText(`429Error`));
+        return;
+    } else if (response.status === 500) {
+        this.createRobloxError(common.getText(`500Error`));
+        return;
+    } else if (response.status === 404) {
+        this.createRobloxError(common.getText(`404Error`));
+        return;
+    } else if (response.status === 502) {
+        this.createRobloxError(common.getText(`502Error`));
+        return;
+    } else if (response.status === 422) {
+        this.createRobloxError(common.getText('422Error'));
+        return;
+    }
+    return response.json();
+}
+
+function romonitorErrorHandler(error) {
+    createRobloxError(common.getText(`contactError`));
+    Promise.reject(error);
+}
+
+function createRobloxError(message, icon = 'icon-warning', code = null) {
+    const tabContainer = document.getElementsByClassName('col-xs-12 rbx-tabs-horizontal')[0];
+    const messageBanner = document.createElement('div');
+
+    messageBanner.classList.add('message-banner');
+    messageBanner.innerHTML = `<span class="${icon}"></span> ${message}`;
+    messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+    tabContainer.insertBefore(messageBanner, tabContainer.firstChild);
+}
+
+
+
 
 
 export default common;
