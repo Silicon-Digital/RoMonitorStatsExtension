@@ -1,9 +1,10 @@
 {
   "update_url": "https://clients2.google.com/service/update2/crx",
   "manifest_version": 3,
-  "name": "RoMonitor Stats - Roblox Stats",
+  "name": "__MSG_extName__",
   "version": "1.0.4",
-  "description": "View Roblox game analytics from RoMonitor Stats inside Roblox",
+  "description": "__MSG_extDesc__",
+  "default_locale": "en",
   "content_scripts": [
     {
       "js": [
@@ -16,6 +17,8 @@
         "*://*.roblox.com/games/*",
         "*://*.roblox.com/users/*",
         "*://*.roblox.com/groups/*",
+        "*://*.roblox.com/home*",
+        "*://*.roblox.com/discover*",
         "https://romonitorstats.com/api/v1/extension/*"
       ]
     }

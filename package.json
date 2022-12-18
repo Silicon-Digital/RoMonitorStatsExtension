@@ -1,0 +1,27 @@
+{
+  "name": "romonitorstatsextension",
+  "version": "1.0.0",
+  "description": "RoMonitor Stats browser extension for https://roblox.com",
+  "mode": "development",
+  "main": "./src/romoext.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "watch": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SiliconLuke/RoMonitorStatsExtension.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SiliconLuke/RoMonitorStatsExtension/issues"
+  },
+  "homepage": "https://github.com/SiliconLuke/RoMonitorStatsExtension#readme",
+  "devDependencies": {
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  }
+}
