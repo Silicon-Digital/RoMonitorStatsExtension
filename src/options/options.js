@@ -12,23 +12,34 @@ function show(pageName) {
 
     pageList.forEach((page) => {
         if (pageName !== page) {
-            console.log(`page: ${page}`);
             document.getElementById(page).style.display = 'none'
-
-            console.log(document);
         }
     })
 }
 
+const checkboxes = [
+    'gameStatsDisplayed',
+    'gameMilestonesDisplayed',
+    'gameSocialGraphDisplayed',
+    'gameNameChangesDisplayed',
+    'gameRoMonitorStatsDisplayed',
+    'homeTopExperiencesDisplayed',
+    'discoverTopExperiencesDisplayed'
+];
+
 // Saves options to chrome.storage
 function save_options() {
-    let checkboxesElements = checkboxes.map((checkbox) => {
+    let checkboxesElements = checkboxes.filter(
+        (checkbox) => {
+            return document.getElementById(checkbox);
+        }).map((checkbox) => {
+        console.log(checkbox);
         return [
             checkbox, document.getElementById(checkbox).checked
         ]
     })
     checkboxesElements = Object.fromEntries(checkboxesElements)
-    debugger;
+    console.log(checkboxesElements);
     chrome.storage.sync.set(checkboxesElements, function() {
         // Update status to let user know options were saved.
         // var status = document.getElementById('status');
@@ -75,17 +86,12 @@ buttonAry.forEach((button) => {
     })
 })
 
-var checkboxes = [
-    'gameStatsDisplayed',
-    'gameMilestonesDisplayed',
-    'gameSocialGraphDisplayed',
-    'gameNameChangesDisplayed',
-    'gameRoMonitorStatsDisplayed',
-    'homeTopExperiencesDisplayed',
-    'discoverTopExperiencesDisplayed'
-]
 
 checkboxes.forEach((checkbox) => {
-    document.getElementById(checkbox).addEventListener('click', () => save_options())
+    let domCheckbox = document.getElementById(checkbox);
+
+    if (domCheckbox) {
+        domCheckbox.addEventListener('click', () => save_options())
+    }
 })
 

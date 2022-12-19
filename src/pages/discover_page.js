@@ -32,9 +32,7 @@ export default {
 }
 
 function buildDiscoverSearch() {
-    let container;
-
-    // Perform a bunch of checks here to make sure the 
+    // Perform a bunch of checks here to make sure the
     // HTML looks like it is expected, to avoid extension breaking/doing 
     // weird things if webpage is updated in the future. 
     
@@ -149,9 +147,8 @@ function buildLeftButton() {
         <div class="spacer"></div>
     
         `
-    leftScroll.addEventListener("click", (e) => {
+    leftScroll.addEventListener("click", () => {
         changeCurrent(-calculateCardsPerScreen());
-        updateCarousel;
     });
     return leftScroll;
 
@@ -172,7 +169,7 @@ function buildRightButton() {
         <div class="spacer"></div>
     
         `
-    rightScroll.addEventListener("click", (e) => {
+    rightScroll.addEventListener("click", () => {
         changeCurrent(calculateCardsPerScreen());
     });
     return rightScroll;
@@ -207,11 +204,11 @@ function buildCarousel() {
     let length = discoverConfig.data.length - 1; 
 
     discoverConfig.data.forEach((game, index) => {
-        if (index == 0) {
+        if (index === 0) {
             ul.appendChild(buildGame(game, "first-tile"));
 
         } 
-        else if (index == length) {
+        else if (index === length) {
             ul.appendChild(buildGame(game, "last-tile"));
         } else{
             ul.appendChild(buildGame(game))
@@ -236,7 +233,7 @@ function buildGame(game, extraClass="") {
         <a class="game-card-link" href="${href}">
             <div class="featured-game-icon-container">
                 <span class="thumbnail-2d-container brief-game-icon">
-                    <img class src="${game.icon}" alt=${game.name} title="${game.name}"></img>
+                    <img class src="${game.icon}" alt=${game.name} title="${game.name}">
                 </span>
             </div>
             <div class="info-container">
