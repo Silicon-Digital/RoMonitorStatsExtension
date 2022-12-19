@@ -1,4 +1,4 @@
-import common from './common'
+import common from '../common'
 
 let discoverConfig = {
     data: null,
@@ -15,13 +15,19 @@ let current = 0;
 
 export default {
     extendDiscover: async function () {
-        await common.getDiscoverData().then(
-            (data) => {
-                discoverConfig.data = data;
-            }
-        );
 
-        buildDiscoverSearch();
+        let options = await chrome.storage.sync.get({discoverTopExperiencesDisplayed: true});
+
+        if (options.discoverTopExperiencesDisplayed) {
+            await common.getDiscoverData().then(
+                (data) => {
+                    discoverConfig.data = data;
+                }
+            );
+
+            buildDiscoverSearch();
+        }
+
     }
 }
 
@@ -80,7 +86,7 @@ function buildGameListContainer() {
     container.setAttribute("data-testid", "game-carousel-games-container");
     container.className = "games-list-container"
 
-    container.appendChild(buildHeader("Top Experiences", "/"));
+    container.appendChild(buildHeader(common.getText("Top_Experiences"),"/"));
     container.appendChild(buildList());
     
     return container;

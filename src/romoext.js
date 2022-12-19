@@ -11,7 +11,7 @@ let pageEnum = {
 }
 
 window.addEventListener('load', async function () {
-    // Result of prefab check indicates which type of page we are on. 
+    // Result of prefab check indicates which type of page we are on.
     const check_id = checkPage();
 
 
