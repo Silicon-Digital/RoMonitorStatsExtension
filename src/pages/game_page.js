@@ -96,9 +96,9 @@ async function buildTabs() {
     lastAddedTab = null;
 
     (await getTabs()).forEach((tab) => {
-        var gameNavigationTabs = document.getElementById("horizontal-tabs");
-        var newTab = gameNavigationTabs.lastElementChild.cloneNode(true);
-        var tabTitle = newTab.getElementsByClassName('text-lead')[0];
+        const gameNavigationTabs = document.getElementById("horizontal-tabs");
+        const newTab = gameNavigationTabs.lastElementChild.cloneNode(true);
+        const tabTitle = newTab.getElementsByClassName('text-lead')[0];
 
         tabTitle.textContent = tab.title;
         newTab.classList.remove("tab-game-instances");
@@ -118,8 +118,9 @@ async function buildTabs() {
 
         lastAddedTab = tab.id;
 
+        let firstTabContent;
         if (!tab.href) {
-            var firstTabContent = document.getElementById('about').cloneNode(true);
+            firstTabContent = document.getElementById('about').cloneNode(true);
             firstTabContent.id = tab.id;
             firstTabContent.classList.add(tab.id);
             firstTabContent.innerHTML = '';

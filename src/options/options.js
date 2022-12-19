@@ -1,6 +1,5 @@
 
 function show(pageName) {
-
     const pageList = [
         "general-settings-page",
         "homepage-settings-page",
@@ -15,6 +14,7 @@ function show(pageName) {
             document.getElementById(page).style.display = 'none'
         }
     })
+    restore_options();
 }
 
 const checkboxes = [
@@ -33,28 +33,24 @@ function save_options() {
         (checkbox) => {
             return document.getElementById(checkbox);
         }).map((checkbox) => {
-        console.log(checkbox);
         return [
             checkbox, document.getElementById(checkbox).checked
         ]
     })
     checkboxesElements = Object.fromEntries(checkboxesElements)
-    console.log(checkboxesElements);
-    chrome.storage.sync.set(checkboxesElements, function() {
-        // Update status to let user know options were saved.
-        // var status = document.getElementById('status');
-        // status.textContent = 'Options saved.';
-        // setTimeout(function() {
-        //     status.textContent = '';
-        // }, 750);
-    });
+
+    getBrowser().storage.sync.set(checkboxesElements);
 }
 
 // Restores select box and checkbox state using the preferences
+function getBrowser() {
+    return chrome;
+}
+
 // stored in chrome.storage.
 function restore_options() {
     // Use default value color = 'red' and likesColor = true.
-    chrome.storage.sync.get({
+    getBrowser().storage.sync.get({
         gameStatsDisplayed: true,
         gameMilestonesDisplayed: true,
         gameSocialGraphDisplayed: true,
@@ -63,16 +59,15 @@ function restore_options() {
         homeTopExperiencesDisplayed: true,
         discoverTopExperiencesDisplayed: true
     }, function(items) {
+        console.log(items);
         Object.keys(items).forEach(key =>{
-            document.getElementById(key).checked = items[key]
+            let checkbox = document.getElementById(key);
+            if (checkbox) checkbox.checked = items[key];
         })
         // document.getElementById('like').checked = items.likesColor;
     });
 }
 document.addEventListener('DOMContentLoaded', restore_options);
-
-// document.getElementById('save').addEventListener('click',
-//     save_options);
 
 document.getElementById('btn-home-page-settings').addEventListener('click', ()=>show('homepage-settings-page'))
 document.getElementById('btn-discover-page-settings').addEventListener('click', ()=>show('discover-settings-page'))

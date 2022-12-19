@@ -256,7 +256,7 @@ function buildGame(game, extraClass="") {
 
     // Dynamic card 
     /*
-    If a Dynamic card hover wants to be added, a new div should be made here. Currently will be static. 
+    If a Dynamic card hover wants to be added, a new div should be made here. Currently, will be static.
     */
 
     return li;

@@ -2,12 +2,14 @@
     "manifest_version": 2,
     "name": "RoMonitor Stats - Roblox Stats",
     "author": "Silicon Digital Group Ltd",
+    "id": "romonitor-stats-extension",
     "version": "1.0.4",
     "description": "View Roblox game analytics from RoMonitor Stats inside Roblox",
+    "default_locale": "en",
     "content_scripts": [
       {
         "js": [
-          "stats.js"
+          "./dist/romoext.bundle.js"
         ],
         "css": [
           "romonitor.css"
@@ -16,6 +18,8 @@
           "*://*.roblox.com/games/*",
           "*://*.roblox.com/users/*",
           "*://*.roblox.com/groups/*",
+          "*://*.roblox.com/home*",
+          "*://*.roblox.com/discover*",
           "https://romonitorstats.com/api/v1/extension/*"
         ]
       }
@@ -25,10 +29,14 @@
       "*://*.roblox.com/users/*",
       "*://*.roblox.com/groups/*",
       "https://romonitorstats.com/api/v1/extension/*",
-      "webRequest"
+      "webRequest",
+      "storage"
     ],
     "icons": {
       "48": "icon48.png",
       "128": "icon128.png"
+    },
+    "options_ui": {
+      "page": "./src/options/options.html"
     }
   }

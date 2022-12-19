@@ -109,7 +109,7 @@ function buildHomePageTitle(title, href) {
                           </a>
                         </h2>
                         <div class="btn-secondary-xs see-all-link-icon btn-more">
-                          ${config.poweredBy}
+                            ${common.getText('PoweredBy')} by <a href="https://romonitorstats.com/leaderboard/active" class="text-link">RoMonitor Stats</a>
                         </div>`;
     newTitle.id = "romonitor-title";
     return newTitle;
