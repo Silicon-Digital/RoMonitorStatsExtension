@@ -8,7 +8,7 @@ function show(pageName) {
         "game-page-settings-page"
     ]
 
-    document.getElementById(pageName).style.display = 'block'
+    document.getElementById(pageName).style.display = 'flex'
 
     pageList.forEach((page) => {
         if (pageName !== page) {
