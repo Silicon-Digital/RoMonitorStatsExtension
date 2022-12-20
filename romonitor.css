@@ -13,6 +13,7 @@
 .romonitor-image-container {
     width: 150px !important;
     height: 150px !important;
+    border-radius: 8px;
 }
 
 @media (max-width : 543px) {

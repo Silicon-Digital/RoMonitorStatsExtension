@@ -232,7 +232,7 @@ function buildGame(game, extraClass = "") {
     liDiv.innerHTML = `
         <a class="game-card-link" href="${href}">
             <div class="featured-game-icon-container">
-                <span class="romonitor-image-container thumbnail-2d-container brief-game-icon">
+                <span class="romonitor-image-container thumbnail-2d-container brief-game-icon game-card-thumb">
                     <img class="romonitor-image" src="${game.icon}" alt=${game.name} title="${game.name}" loading="lazy">
                 </span>
             </div>

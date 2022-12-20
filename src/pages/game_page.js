@@ -47,7 +47,6 @@ async function getTabs() {
         romonitorGameRoMonitorStatsDisplayed: true,
         romonitorGameNameChangesDisplayed: true
     })
-    console.log(options);
 
     const tabs = [];
 
