@@ -138,6 +138,7 @@ function buildLeftButton() {
     leftScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     leftScroll.setAttribute("role", "button");
     leftScroll.setAttribute("tabindex", "0");
+    leftScroll.setAttribute("style", "height: 240px !important;")
 
     leftScroll.innerHTML = 
         `
@@ -160,6 +161,7 @@ function buildRightButton() {
     rightScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     rightScroll.setAttribute("role", "button");
     rightScroll.setAttribute("tabindex", "0");
+    rightScroll.setAttribute("style", "height: 240px !important;")
 
     rightScroll.innerHTML = 
         `
@@ -223,6 +225,7 @@ function buildGame(game, extraClass="") {
     const href = discoverConfig.robloxGameUri + game.placeId
     const li = document.createElement("li");
     li.setAttribute("class", "list-item hover-game-tile " + extraClass);
+    li.setAttribute("style", "width: 150px;")
     li.id = game.placeId;
     const liDiv = document.createElement("div");
     li.appendChild(liDiv);
@@ -232,12 +235,12 @@ function buildGame(game, extraClass="") {
     liDiv.innerHTML = `
         <a class="game-card-link" href="${href}">
             <div class="featured-game-icon-container">
-                <span class="thumbnail-2d-container brief-game-icon">
-                    <img class src="${game.icon}" alt=${game.name} title="${game.name}">
+                <span class="romonitor-image-container brief-game-icon">
+                    <img class="romonitor-image" src="${game.icon}" alt=${game.name} title="${game.name}">
                 </span>
             </div>
             <div class="info-container">
-                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}">${game.name}</div>
+                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}" style="width: 150px">${game.name}</div>
                 <div data-testid="game-tile-card-info" class="game-card-info">
                     <span class="info-label icon-votes-gray"></span>
                     <span class="info-label vote-percentage-label" data-testid="game-tile-card-info-vote-label">${common.fixPercentage(game.rating)}</span>

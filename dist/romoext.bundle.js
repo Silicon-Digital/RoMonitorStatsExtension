@@ -12,47 +12,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-let common;
-
-function romonitorResponseHandler(response) {
-    if (response.status === 429) {
-        this.createRobloxError(common.getMessage(`429Error`));
-        return;
-    } else if (response.status === 500) {
-        this.createRobloxError(common.getMessage(`500Error`));
-        return;
-    } else if (response.status === 404) {
-        this.createRobloxError(common.getMessage(`404Error`));
-        return;
-    } else if (response.status === 502) {
-        this.createRobloxError(common.getMessage(`502Error`));
-        return;
-    } else if (response.status === 422) {
-        this.createRobloxError(common.getMessage('422Error'));
-        return;
-    }
-    return response.json();
-}
-
-function romonitorErrorHandler(error) {
-    createRobloxError(common.getMessage(`contactError`));
-    Promise.reject(error);
-}
-
-function createRobloxError(message, icon = 'icon-warning', code = null) {
-    const tabContainer = document.getElementsByClassName('col-xs-12 rbx-tabs-horizontal')[0];
-    const messageBanner = document.createElement('div');
-
-    messageBanner.classList.add('message-banner');
-    messageBanner.innerHTML = `<span class="${icon}"></span> ${message}`;
-    messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
-    tabContainer.insertBefore(messageBanner, tabContainer.firstChild);
-}
-
 let config = {
     apiEndpoint: 'https://romonitorstats.com/api/v1/',
-    poweredBy: `${common.getMessage('PoweredBy')} by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
-    poweredByText: `${common.getMessage('PoweredBy')} RoMonitor Stats`
+    poweredBy: `${getText('PoweredBy')} by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
+    poweredByText: `${getText('PoweredBy')} RoMonitor Stats`
+};
+
+let common;
+function getText(textId) {
+    return chrome.i18n.getMessage(textId);
 }
 
 common = {
@@ -101,15 +69,13 @@ common = {
 
     // Used to get the text for display. Use function to add functionality for firefox later. 
     getText(textId) {
-        console.log(navigator.languages[0])
-        console.log(chrome.i18n.getMessage(textId));
         return chrome.i18n.getMessage(textId);
     },
     findTranslation(str) {
-        var replaced = str.split(' ').join('_');
-        var translation = chrome.i18n.getMessage(replaced);
-      
-        if (translation != '') {
+        const replaced = str.split(' ').join('_');
+        const translation = chrome.i18n.getText(replaced);
+
+        if (translation !== '') {
           return translation
         } else {
           return str
@@ -117,6 +83,44 @@ common = {
     }
 
 }
+
+function romonitorResponseHandler(response) {
+    if (response.status === 429) {
+        this.createRobloxError(common.getText(`429Error`));
+        return;
+    } else if (response.status === 500) {
+        this.createRobloxError(common.getText(`500Error`));
+        return;
+    } else if (response.status === 404) {
+        this.createRobloxError(common.getText(`404Error`));
+        return;
+    } else if (response.status === 502) {
+        this.createRobloxError(common.getText(`502Error`));
+        return;
+    } else if (response.status === 422) {
+        this.createRobloxError(common.getText('422Error'));
+        return;
+    }
+    return response.json();
+}
+
+function romonitorErrorHandler(error) {
+    createRobloxError(common.getText(`contactError`));
+    Promise.reject(error);
+}
+
+function createRobloxError(message, icon = 'icon-warning', code = null) {
+    const tabContainer = document.getElementsByClassName('col-xs-12 rbx-tabs-horizontal')[0];
+    const messageBanner = document.createElement('div');
+
+    messageBanner.classList.add('message-banner');
+    messageBanner.innerHTML = `<span class="${icon}"></span> ${message}`;
+    messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+    tabContainer.insertBefore(messageBanner, tabContainer.firstChild);
+}
+
+
+
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (common);
@@ -151,20 +155,24 @@ let current = 0;
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
     extendDiscover: async function () {
-        await _common__WEBPACK_IMPORTED_MODULE_0__["default"].getDiscoverData().then(
-            (data) => {
-                discoverConfig.data = data;
-            }
-        );
 
-        buildDiscoverSearch();
+        let options = await chrome.storage.sync.get({discoverTopExperiencesDisplayed: true});
+
+        if (options.discoverTopExperiencesDisplayed) {
+            await _common__WEBPACK_IMPORTED_MODULE_0__["default"].getDiscoverData().then(
+                (data) => {
+                    discoverConfig.data = data;
+                }
+            );
+
+            buildDiscoverSearch();
+        }
+
     }
 });
 
 function buildDiscoverSearch() {
-    let container;
-
-    // Perform a bunch of checks here to make sure the 
+    // Perform a bunch of checks here to make sure the
     // HTML looks like it is expected, to avoid extension breaking/doing 
     // weird things if webpage is updated in the future. 
     
@@ -270,6 +278,7 @@ function buildLeftButton() {
     leftScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     leftScroll.setAttribute("role", "button");
     leftScroll.setAttribute("tabindex", "0");
+    leftScroll.setAttribute("style", "height: 240px !important;")
 
     leftScroll.innerHTML = 
         `
@@ -279,9 +288,8 @@ function buildLeftButton() {
         <div class="spacer"></div>
     
         `
-    leftScroll.addEventListener("click", (e) => {
+    leftScroll.addEventListener("click", () => {
         changeCurrent(-calculateCardsPerScreen());
-        updateCarousel;
     });
     return leftScroll;
 
@@ -293,6 +301,7 @@ function buildRightButton() {
     rightScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     rightScroll.setAttribute("role", "button");
     rightScroll.setAttribute("tabindex", "0");
+    rightScroll.setAttribute("style", "height: 240px !important;")
 
     rightScroll.innerHTML = 
         `
@@ -302,7 +311,7 @@ function buildRightButton() {
         <div class="spacer"></div>
     
         `
-    rightScroll.addEventListener("click", (e) => {
+    rightScroll.addEventListener("click", () => {
         changeCurrent(calculateCardsPerScreen());
     });
     return rightScroll;
@@ -337,11 +346,11 @@ function buildCarousel() {
     let length = discoverConfig.data.length - 1; 
 
     discoverConfig.data.forEach((game, index) => {
-        if (index == 0) {
+        if (index === 0) {
             ul.appendChild(buildGame(game, "first-tile"));
 
         } 
-        else if (index == length) {
+        else if (index === length) {
             ul.appendChild(buildGame(game, "last-tile"));
         } else{
             ul.appendChild(buildGame(game))
@@ -356,6 +365,7 @@ function buildGame(game, extraClass="") {
     const href = discoverConfig.robloxGameUri + game.placeId
     const li = document.createElement("li");
     li.setAttribute("class", "list-item hover-game-tile " + extraClass);
+    li.setAttribute("style", "width: 150px;")
     li.id = game.placeId;
     const liDiv = document.createElement("div");
     li.appendChild(liDiv);
@@ -365,12 +375,12 @@ function buildGame(game, extraClass="") {
     liDiv.innerHTML = `
         <a class="game-card-link" href="${href}">
             <div class="featured-game-icon-container">
-                <span class="thumbnail-2d-container brief-game-icon">
-                    <img class src="${game.icon}" alt=${game.name} title="${game.name}"></img>
+                <span class="romonitor-image-container brief-game-icon">
+                    <img class="romonitor-image" src="${game.icon}" alt=${game.name} title="${game.name}">
                 </span>
             </div>
             <div class="info-container">
-                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}">${game.name}</div>
+                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}" style="width: 150px">${game.name}</div>
                 <div data-testid="game-tile-card-info" class="game-card-info">
                     <span class="info-label icon-votes-gray"></span>
                     <span class="info-label vote-percentage-label" data-testid="game-tile-card-info-vote-label">${_common__WEBPACK_IMPORTED_MODULE_0__["default"].fixPercentage(game.rating)}</span>
@@ -389,7 +399,7 @@ function buildGame(game, extraClass="") {
 
     // Dynamic card 
     /*
-    If a Dynamic card hover wants to be added, a new div should be made here. Currently will be static. 
+    If a Dynamic card hover wants to be added, a new div should be made here. Currently, will be static.
     */
 
     return li;
@@ -433,66 +443,86 @@ let nameChangesGraphData = null;
     extendGame: async function () {
         await getGame();
 
-        buildTabs();
+        await buildTabs();
     }
 });
 
 // Get the data from API that is relevant the game page we are on. 
 async function getGame() {
     gameConfig.activePlaceID = document.querySelector("#game-detail-page").dataset.placeId;
-    return await _common__WEBPACK_IMPORTED_MODULE_0__["default"].postData({ game: gameConfig.activePlaceID }, gameConfig.apiExtension)
+    return await _common__WEBPACK_IMPORTED_MODULE_0__["default"].postData({game: gameConfig.activePlaceID}, gameConfig.apiExtension)
         .then((data) => {
             if (data && data.success) {
-                const tabFixCss = '.rbx-tab { width: 25% !important };';
-                const styleElement = document.createElement('style');
-                document.head.appendChild(styleElement);
-                styleElement.type = 'text/css';
-                styleElement.appendChild(document.createTextNode(tabFixCss));
 
                 gameConfig.data = data;
 
-            }
-            else if (data && data.success && data.message && data.code) {
+            } else if (data && data.success && data.message && data.code) {
                 _common__WEBPACK_IMPORTED_MODULE_0__["default"].createRobloxError(data.message, data.icon, data.code);
             }
 
         });
 }
 
-function getTabs() {
-    return [
-        {
-            title: _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText("tabStats"),
-            id: 'stats',
-        },
-        {
+async function getTabs() {
+    let options = await chrome.storage.sync.get({
+        gameStatsDisplayed: true,
+        gameMilestonesDisplayed: true,
+        gameSocialGraphDisplayed: true,
+        gameRoMonitorStatsDisplayed: true,
+        gameNameChangesDisplayed: true
+    })
+
+    const tabs = [];
+
+    if (options.gameStatsDisplayed) {
+        tabs.push(
+            {
+                title: _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText("tabStats"),
+                id: 'stats',
+            }
+        )
+    }
+
+    if (options.gameMilestonesDisplayed) {
+        tabs.push({
             title: _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText('tabMilestones'),
             id: 'milestones',
-        },
-        {
+        })
+    }
+
+    if (options.gameSocialGraphDisplayed) {
+        tabs.push({
             title: _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText('tabSocialGraph'),
             id: 'social-graph',
-        },
-        {
+        })
+    }
+
+    if (options.gameNameChangesDisplayed) {
+        tabs.push({
             title: _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText('tabNameChanges'),
             id: 'name-changes',
-        },
-        {
+        })
+    }
+
+    if (options.gameRoMonitorStatsDisplayed) {
+        tabs.push({
             title: _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText('tabRoMonitor'),
             id: 'go-to-stats',
             href: `https://romonitorstats.com/experience/${gameConfig.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
             target: '_blank',
-        }
-    ];
+        })
+    }
+
+    return tabs;
 }
 
-function buildTabs() {
+async function buildTabs() {
     lastAddedTab = null;
 
-    getTabs().forEach((tab) => {
-        var gameNavigationTabs = document.getElementById("horizontal-tabs");
-        var newTab = gameNavigationTabs.lastElementChild.cloneNode(true);
-        var tabTitle = newTab.getElementsByClassName('text-lead')[0];
+    (await getTabs()).forEach((tab) => {
+        const gameNavigationTabs = document.getElementById("horizontal-tabs");
+        const newTab = gameNavigationTabs.lastElementChild.cloneNode(true);
+        const tabTitle = newTab.getElementsByClassName('text-lead')[0];
 
         tabTitle.textContent = tab.title;
         newTab.classList.remove("tab-game-instances");
@@ -512,8 +542,9 @@ function buildTabs() {
 
         lastAddedTab = tab.id;
 
+        let firstTabContent;
         if (!tab.href) {
-            var firstTabContent = document.getElementById('about').cloneNode(true);
+            firstTabContent = document.getElementById('about').cloneNode(true);
             firstTabContent.id = tab.id;
             firstTabContent.classList.add(tab.id);
             firstTabContent.innerHTML = '';
@@ -523,15 +554,14 @@ function buildTabs() {
 
             const containerHeader = document.createElement('div');
             containerHeader.classList.add('container-header');
-            const poweredByHtml =
-                containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">${_common__WEBPACK_IMPORTED_MODULE_0__["default"].poweredBy}</div>`;
+            containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">${_common__WEBPACK_IMPORTED_MODULE_0__["default"].config.poweredBy}</div>`;
             firstTabContent.appendChild(containerHeader);
         }
 
         /** The following are lightweight queries to our servers, so we build these to make the tabs load faster, others are dynamically injected. */
-        if (tab.title === _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText('Milestones')) {
+        if (tab.title === _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText('tabMilestones')) {
             buildMilestonesTab();
-        } else if (tab.title === _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText('Stats')) {
+        } else if (tab.title === _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText('tabStats')) {
             buildStatsTab();
         }
 
@@ -540,13 +570,22 @@ function buildTabs() {
         }
     });
 
-    /** Adds event listeners to the default Roblox tabs */
-    const baseRobloxTabs = ['about', 'store', 'game-instances'];
-    baseRobloxTabs.forEach((tab) => {
-        const tabElement = document.getElementById(`tab-${tab}`);
+    if (lastAddedTab != null) {
+        const tabFixCss = '.rbx-tab { width: 25% !important };';
+        const styleElement = document.createElement('style');
+        document.head.appendChild(styleElement);
+        styleElement.type = 'text/css';
+        styleElement.appendChild(document.createTextNode(tabFixCss));
 
-        addTabListener(tabElement, document.getElementById(tab));
-    });
+
+        /** Adds event listeners to the default Roblox tabs */
+        const baseRobloxTabs = ['about', 'store', 'game-instances'];
+        baseRobloxTabs.forEach((tab) => {
+            const tabElement = document.getElementById(`tab-${tab}`);
+
+            addTabListener(tabElement, document.getElementById(tab));
+        });
+    }
 }
 
 function addTabListener(tab, aboutContent) {
@@ -584,7 +623,7 @@ function addTabListener(tab, aboutContent) {
                 tab.id = 'nameChanges';
             }
 
-            _common__WEBPACK_IMPORTED_MODULE_0__["default"].postData({ game: gameConfig.activePlaceID, tab: tab.id }, gameConfig.apiExtension)
+            _common__WEBPACK_IMPORTED_MODULE_0__["default"].postData({game: gameConfig.activePlaceID, tab: tab.id}, gameConfig.apiExtension)
                 .then((data) => {
                     if (data.success) {
                         if (tab.id === 'socialGraph') {
@@ -637,12 +676,12 @@ function buildStatsTab() {
     gameConfig.data.stats.items.forEach((item) => {
         const gridEntry = document.createElement('div');
         gridEntry.classList.add('romonitor-grid-item');
-        gridEntry.innerHTML =  `<h2 style="
+        gridEntry.innerHTML = `<h2 style="
                                     text-align: center;
                                     ">${item.copy}</h2>
                                     <p style="
                                        text-align: center;
-                                        ">${_common__WEBPACK_IMPORTED_MODULE_0__["default"].findTranslation(item.title)}</p>`
+                                        ">${item.title}</p>`
         flexboxContainer.appendChild(gridEntry);
     });
 
@@ -675,75 +714,75 @@ function buildMilestonesTab() {
 
         const svg = `<a href="${milestone.tweet}" target="_blank"><svg class="romonitor-milestone-social-item" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#1DA1F2" d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a></div>`
 
-        milestoneEntry.innerHTML = `<td>${milestone.value} ${_common__WEBPACK_IMPORTED_MODULE_0__["default"].findTranslation(milestone.type)}</td><td>${milestone.achieved}</td><td class="romonitor-tableitem">${svg}</td>`;
+        milestoneEntry.innerHTML = `<td>${milestone.value} ${milestone.type}</td><td>${milestone.achieved}</td><td class="romonitor-tableitem">${svg}</td>`;
 
         document.getElementById('milestones-table').appendChild(milestoneEntry);
     });
 }
 
 function buildNameChangesTab() {
-  document.getElementById('name-changes-loader').remove();
-  const nameChangesContainer = document.getElementsByClassName('tab-pane name-changes');
-  const nameChangesTable = document.createElement('table');
-  nameChangesTable.classList.add('table');
-  nameChangesTable.classList.add('table-striped');
-  nameChangesTable.innerHTML = `<thead><tr><th class="text-label">${_common__WEBPACK_IMPORTED_MODULE_0__["default"].getText(`tableNC_Name`)}</th><th class="text-label">${_common__WEBPACK_IMPORTED_MODULE_0__["default"].getText(`tableNC_Changed`)}</th></tr></thead><tbody id="name-changes-table"></tbody>`;
+    document.getElementById('name-changes-loader').remove();
+    const nameChangesContainer = document.getElementsByClassName('tab-pane name-changes');
+    const nameChangesTable = document.createElement('table');
+    nameChangesTable.classList.add('table');
+    nameChangesTable.classList.add('table-striped');
+    nameChangesTable.innerHTML = `<thead><tr><th class="text-label">${_common__WEBPACK_IMPORTED_MODULE_0__["default"].getText(`tableNC_Name`)}</th><th class="text-label">${_common__WEBPACK_IMPORTED_MODULE_0__["default"].getText(`tableNC_Changed`)}</th></tr></thead><tbody id="name-changes-table"></tbody>`;
 
-  if (!Object.keys(nameChangesGraphData).length) {
-    const messageBanner = document.createElement('div');
+    if (!Object.keys(nameChangesGraphData).length) {
+        const messageBanner = document.createElement('div');
 
-    messageBanner.classList.add('message-banner');
-    messageBanner.innerHTML = `<span class="icon-warning"></span> ${_common__WEBPACK_IMPORTED_MODULE_0__["default"].getText(`NC_NotFound`)}`;
-    messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
-    nameChangesContainer[0].appendChild(messageBanner);
+        messageBanner.classList.add('message-banner');
+        messageBanner.innerHTML = `<span class="icon-warning"></span> ${_common__WEBPACK_IMPORTED_MODULE_0__["default"].getText(`NC_NotFound`)}`;
+        messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+        nameChangesContainer[0].appendChild(messageBanner);
 
-    return;
-  }
-  const limitWarning = document.createElement('div');
-  limitWarning.classList.add('text-label');
-  limitWarning.innerHTML = _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText(`NC_LimitNote`);
+        return;
+    }
+    const limitWarning = document.createElement('div');
+    limitWarning.classList.add('text-label');
+    limitWarning.innerHTML = _common__WEBPACK_IMPORTED_MODULE_0__["default"].getText(`NC_LimitNote`);
 
-  nameChangesContainer[0].appendChild(limitWarning);
-  nameChangesContainer[0].appendChild(nameChangesTable);
+    nameChangesContainer[0].appendChild(limitWarning);
+    nameChangesContainer[0].appendChild(nameChangesTable);
 
-  Object.keys(nameChangesGraphData).reverse().forEach((changeIndex) => {
-    const nameChange = nameChangesGraphData[changeIndex];
-    const changeEntry = document.createElement('tr');
-    changeEntry.innerHTML = `<td>${nameChange.name}</td><td>${nameChange.changed}</td>`;
+    Object.keys(nameChangesGraphData).reverse().forEach((changeIndex) => {
+        const nameChange = nameChangesGraphData[changeIndex];
+        const changeEntry = document.createElement('tr');
+        changeEntry.innerHTML = `<td>${nameChange.name}</td><td>${nameChange.changed}</td>`;
 
-    document.getElementById('name-changes-table').appendChild(changeEntry);
-  });
+        document.getElementById('name-changes-table').appendChild(changeEntry);
+    });
 }
 
 function buildSocialGraphTab() {
-  document.getElementById('social-graph-loader').remove();
-  const socialGraphContainer = document.getElementsByClassName('tab-pane social-graph');
+    document.getElementById('social-graph-loader').remove();
+    const socialGraphContainer = document.getElementsByClassName('tab-pane social-graph');
 
-  if (!socialGraphData.items) {
-    const socialGraphMessageBanner = document.createElement('div');
+    if (!socialGraphData.items) {
+        const socialGraphMessageBanner = document.createElement('div');
 
-    socialGraphMessageBanner.classList.add('message-banner');
-    socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> ${socials_NotFound}`;
-    socialGraphMessageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
-    socialGraphContainer[0].appendChild(socialGraphMessageBanner);
-  } else {
-    const flexboxContainer = document.createElement('div');
+        socialGraphMessageBanner.classList.add('message-banner');
+        socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> ${socials_NotFound}`;
+        socialGraphMessageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+        socialGraphContainer[0].appendChild(socialGraphMessageBanner);
+    } else {
+        const flexboxContainer = document.createElement('div');
 
-    flexboxContainer.style = 'display: flex; flex-wrap: wrap;';
-    socialGraphData.items.forEach((item) => {
-      const gridEntry = document.createElement('div');
-      gridEntry.classList.add('romonitor-grid-item');
-      gridEntry.innerHTML = `<h2 style="
+        flexboxContainer.style = 'display: flex; flex-wrap: wrap;';
+        socialGraphData.items.forEach((item) => {
+            const gridEntry = document.createElement('div');
+            gridEntry.classList.add('romonitor-grid-item');
+            gridEntry.innerHTML = `<h2 style="
       text-align: center;
   ">${item.copy}</h2>
       <p style="
       text-align: center;
-  ">${findTranslation(item.title)}</p>`
-      flexboxContainer.appendChild(gridEntry);
-    });
+  ">${item.title}</p>`
+            flexboxContainer.appendChild(gridEntry);
+        });
 
-    socialGraphContainer[0].appendChild(flexboxContainer);
-  }
+        socialGraphContainer[0].appendChild(flexboxContainer);
+    }
 }
 
 
@@ -771,13 +810,19 @@ let homeConfig = {
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
     extendPage: async function () {
-        await _common__WEBPACK_IMPORTED_MODULE_0__["default"].getDiscoverData().then(
-            (data) => {
-                homeConfig.data = data;
-            }
-        );
 
-        buildHomeSearch();
+        let options = await chrome.storage.sync.get({homeTopExperiencesDisplayed: true});
+
+        if (options.homeTopExperiencesDisplayed) {
+            await _common__WEBPACK_IMPORTED_MODULE_0__["default"].getDiscoverData().then(
+                (data) => {
+                    homeConfig.data = data;
+                }
+            );
+
+            buildHomeSearch();
+        }
+
     }
 });
 
@@ -866,7 +911,7 @@ function buildHomePageTitle(title, href) {
                           </a>
                         </h2>
                         <div class="btn-secondary-xs see-all-link-icon btn-more">
-                          ${config.poweredBy}
+                            ${_common__WEBPACK_IMPORTED_MODULE_0__["default"].getText('PoweredBy')} by <a href="https://romonitorstats.com/leaderboard/active" class="text-link">RoMonitor Stats</a>
                         </div>`;
     newTitle.id = "romonitor-title";
     return newTitle;
@@ -1034,16 +1079,16 @@ let pageEnum = {
 }
 
 window.addEventListener('load', async function () {
-    // Result of prefab check indicates which type of page we are on. 
+    // Result of prefab check indicates which type of page we are on.
     const check_id = checkPage();
 
 
     if (check_id == pageEnum.game) {
-        _pages_game_page__WEBPACK_IMPORTED_MODULE_0__["default"].extendGame();
+        await _pages_game_page__WEBPACK_IMPORTED_MODULE_0__["default"].extendGame();
     } else if (check_id == pageEnum.home) {
-        _pages_home_page__WEBPACK_IMPORTED_MODULE_1__["default"].extendPage();
+        await _pages_home_page__WEBPACK_IMPORTED_MODULE_1__["default"].extendPage();
     } else if (check_id == pageEnum.discover) {
-        _pages_discover_page__WEBPACK_IMPORTED_MODULE_2__["default"].extendDiscover();
+        await _pages_discover_page__WEBPACK_IMPORTED_MODULE_2__["default"].extendDiscover();
     }
 });
 
