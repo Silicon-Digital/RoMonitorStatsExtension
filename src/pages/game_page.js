@@ -91,16 +91,44 @@ async function getTabs() {
 
     return tabs;
 }
+function buildNotOnRoMoStats() {
+    const gameDetailPage = window.document.getElementById("game-detail-page");
+    if (!gameDetailPage) {
+        return;
+    }
+
+    if (!gameDetailPage.children) {
+        return;
+    }
+
+    if (!gameDetailPage.children[3]) {
+        return;
+    }
+    const menu = window.document.getElementById("horizontal-tabs");
+
+    const container = gameDetailPage.children[3];
+
+
+    const notOnRomonitor = window.document.createElement('div');
+    notOnRomonitor.innerHTML =
+        `
+           <div class="message-banner" style="margin-bottom: 1em; margin-top: 1em;"><span class="icon-warning"></span> This game is not on RoMonitor Stats, <a href="https://romonitorstats.com/request-experience/414420838/?utm_source=roblox&amp;utm_medium=extension&amp;utm_campaign=extension_leadthrough" target="_blank" class="text-link">click here to request it</a></div> 
+        `
+    container.insertBefore(notOnRomonitor, menu);
+
+}
 
 async function buildTabs() {
     lastAddedTab = null;
 
 
     if (!gameConfig.data) {
+        buildNotOnRoMoStats();
         return;
     }
 
     if (!gameConfig.data.stats) {
+        buildNotOnRoMoStats();
         return;
     }
 
