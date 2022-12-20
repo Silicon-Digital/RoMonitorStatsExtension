@@ -41,16 +41,17 @@ async function getGame() {
 
 async function getTabs() {
     let options = await chrome.storage.sync.get({
-        gameStatsDisplayed: true,
-        gameMilestonesDisplayed: true,
-        gameSocialGraphDisplayed: true,
-        gameRoMonitorStatsDisplayed: true,
-        gameNameChangesDisplayed: true
+        romonitorGameStatsDisplayed: true,
+        romonitorGameMilestonesDisplayed: true,
+        romonitorGameSocialGraphDisplayed: true,
+        romonitorGameRoMonitorStatsDisplayed: true,
+        romonitorGameNameChangesDisplayed: true
     })
+    console.log(options);
 
     const tabs = [];
 
-    if (options.gameStatsDisplayed) {
+    if (options.romonitorGameStatsDisplayed) {
         tabs.push(
             {
                 title: common.getText("tabStats"),
@@ -59,28 +60,28 @@ async function getTabs() {
         )
     }
 
-    if (options.gameMilestonesDisplayed) {
+    if (options.romonitorGameMilestonesDisplayed) {
         tabs.push({
             title: common.getText('tabMilestones'),
             id: 'milestones',
         })
     }
 
-    if (options.gameSocialGraphDisplayed) {
+    if (options.romonitorGameSocialGraphDisplayed) {
         tabs.push({
             title: common.getText('tabSocialGraph'),
             id: 'social-graph',
         })
     }
 
-    if (options.gameNameChangesDisplayed) {
+    if (options.romonitorGameNameChangesDisplayed) {
         tabs.push({
             title: common.getText('tabNameChanges'),
             id: 'name-changes',
         })
     }
 
-    if (options.gameRoMonitorStatsDisplayed) {
+    if (options.romonitorGameRoMonitorStatsDisplayed) {
         tabs.push({
             title: common.getText('tabRoMonitor'),
             id: 'go-to-stats',

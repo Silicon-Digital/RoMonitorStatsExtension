@@ -100,17 +100,17 @@ function updateHomePage(container) {
 
 }
 
-function buildHomePageTitle(title, href) {
+function buildHomePageTitle(title) {
     let newTitle = document.createElement("div");
     newTitle.className = 'container-header';
     newTitle.innerHTML = `<h2>
-                          <a href="${href}">
                             ${title} 
-                          </a>
                         </h2>
-                        <div class="btn-secondary-xs see-all-link-icon btn-more">
-                            ${common.getText('PoweredBy')} by <a href="https://romonitorstats.com/leaderboard/active" class="text-link">RoMonitor Stats</a>
-                        </div>`;
+                        <a href="https://romonitorstats.com/leaderboard/active/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough" target="_blank">
+                            <div class="btn-secondary-xs see-all-link-icon btn-more">
+                                ${common.getText('PoweredBy')} <span class="text-link">RoMonitor Stats</span>
+                            </div>
+                        </a>`;
     newTitle.id = "romonitor-title";
     return newTitle;
 }

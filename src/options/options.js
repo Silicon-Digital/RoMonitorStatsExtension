@@ -18,13 +18,13 @@ function show(pageName) {
 }
 
 const checkboxes = [
-    'gameStatsDisplayed',
-    'gameMilestonesDisplayed',
-    'gameSocialGraphDisplayed',
-    'gameNameChangesDisplayed',
-    'gameRoMonitorStatsDisplayed',
-    'homeTopExperiencesDisplayed',
-    'discoverTopExperiencesDisplayed'
+    'romonitorGameStatsDisplayed',
+    'romonitorGameMilestonesDisplayed',
+    'romonitorGameSocialGraphDisplayed',
+    'romonitorGameNameChangesDisplayed',
+    'romonitorGameRoMonitorStatsDisplayed',
+    'romonitorHomeTopExperiencesDisplayed',
+    'romonitorDiscoverTopExperiencesDisplayed'
 ];
 
 // Saves options to chrome.storage
@@ -51,13 +51,13 @@ function getBrowser() {
 function restore_options() {
     // Use default value color = 'red' and likesColor = true.
     getBrowser().storage.sync.get({
-        gameStatsDisplayed: true,
-        gameMilestonesDisplayed: true,
-        gameSocialGraphDisplayed: true,
-        gameRoMonitorStatsDisplayed: true,
-        gameNameChangesDisplayed: true,
-        homeTopExperiencesDisplayed: true,
-        discoverTopExperiencesDisplayed: true
+        romonitorGameStatsDisplayed: true,
+        romonitorGameMilestonesDisplayed: true,
+        romonitorGameSocialGraphDisplayed: true,
+        romonitorGameRoMonitorStatsDisplayed: true,
+        romonitorGameNameChangesDisplayed: true,
+        romonitorHomeTopExperiencesDisplayed: true,
+        romonitorDiscoverTopExperiencesDisplayed: true
     }, function(items) {
         console.log(items);
         Object.keys(items).forEach(key =>{

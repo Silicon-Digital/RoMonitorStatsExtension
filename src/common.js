@@ -1,6 +1,6 @@
 let config = {
     apiEndpoint: 'https://romonitorstats.com/api/v1/',
-    poweredBy: `${getText('PoweredBy')} by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
+    poweredBy: ` <a href="https://romonitorstats.com/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough" target="_blank">${getText('PoweredBy')} <span class="text-link">RoMonitor Stats</span></a>`,
     poweredByText: `${getText('PoweredBy')} RoMonitor Stats`
 };
 
@@ -49,7 +49,7 @@ common = {
     },
 
     async getDiscoverData() {
-        return await common.getData(config.apiEndpoint + "stats/featured-games/get/")
+        return await common.getData(config.apiEndpoint + "extension/top-experiences-carousel/")
             
     },
 

@@ -9,13 +9,29 @@
     margin-left: 15%;
     margin-right: 85%;
 }
+
 .romonitor-image-container {
-    width: 150px;
-    height: 150px;
+    width: 150px !important;
+    height: 150px !important;
 }
+
+@media (max-width : 543px) {
+    .romonitor-image-container {
+        width: 90px !important;
+        height: 90px !important;
+    }
+}
+
 
 .romonitor-image {
     width: 150px;
     height: 150px;
 }
+@media screen and (max-width : 543px) {
+    .romonitor-image {
+        width: 90px;
+        height: 90px;
+    }
+}
+
 
