@@ -196,7 +196,7 @@ function changeCurrent(delta) {
 function buildCarousel() {
     const carousel = document.createElement("div");
     carousel.setAttribute("class", "horizontally-scrollable");
-    carousel.setAttribute("style", "left: 0px;");
+    carousel.setAttribute("style", "left: 0px; height: 270px;");
     carousel.setAttribute("id", "romonitor-carousel");
 
     const ul = document.createElement("ul");
