@@ -96,6 +96,15 @@ async function getTabs() {
 async function buildTabs() {
     lastAddedTab = null;
 
+
+    if (!gameConfig.data) {
+        return;
+    }
+
+    if (!gameConfig.data.stats) {
+        return;
+    }
+
     (await getTabs()).forEach((tab) => {
         const gameNavigationTabs = document.getElementById("horizontal-tabs");
         const newTab = gameNavigationTabs.lastElementChild.cloneNode(true);
