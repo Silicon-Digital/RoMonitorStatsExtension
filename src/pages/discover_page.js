@@ -195,7 +195,7 @@ function changeCurrent(delta) {
 function buildCarousel() {
     const carousel = document.createElement("div");
     carousel.setAttribute("class", "horizontally-scrollable");
-    carousel.setAttribute("style", "left: 0px;");
+    carousel.setAttribute("style", "left: 0px; height: 270px !important;");
     carousel.setAttribute("id", "romonitor-carousel");
 
     const ul = document.createElement("ul");
@@ -237,7 +237,7 @@ function buildGame(game, extraClass = "") {
                 </span>
             </div>
             <div class="info-container">
-                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}">${game.name}</div>
+                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}" style="padding-top: 6px;">${game.name}</div>
                 <div data-testid="game-tile-card-info" class="game-card-info">
                     <span class="info-label icon-votes-gray"></span>
                     <span class="info-label vote-percentage-label" data-testid="game-tile-card-info-vote-label">${common.fixPercentage(game.rating)}</span>
