@@ -134,15 +134,14 @@ function calculateCardsPerScreen() {
 
 function buildLeftButton() {
     const leftScroll = document.createElement("div");
-    leftScroll.setAttribute("class", `scroller prev disabled ${discoverConfig.leftId}`);
+    leftScroll.setAttribute("class", `scroller prev disabled ${discoverConfig.leftId} romonitor-arrow`);
     leftScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     leftScroll.setAttribute("role", "button");
     leftScroll.setAttribute("tabindex", "0");
-    leftScroll.setAttribute("style", "height: 240px !important;")
 
     leftScroll.innerHTML =
         `
-        <div class="arrow">
+        <div class="arrow romonitor-arrow">
             <span class="icon-games-carousel-left"></span>
         </div>
         <div class="spacer"></div>
@@ -157,15 +156,14 @@ function buildLeftButton() {
 
 function buildRightButton() {
     const rightScroll = document.createElement("div");
-    rightScroll.setAttribute("class", `scroller next ${discoverConfig.rightId}`);
+    rightScroll.setAttribute("class", `scroller next ${discoverConfig.rightId} romonitor-arrow`);
     rightScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     rightScroll.setAttribute("role", "button");
     rightScroll.setAttribute("tabindex", "0");
-    rightScroll.setAttribute("style", "height: 240px !important;")
 
     rightScroll.innerHTML =
         `
-        <div class="arrow">
+        <div class="arrow romonitor-arrow">
             <span class="icon-games-carousel-right"></span>
         </div>
         <div class="spacer"></div>
@@ -194,8 +192,8 @@ function changeCurrent(delta) {
 
 function buildCarousel() {
     const carousel = document.createElement("div");
-    carousel.setAttribute("class", "horizontally-scrollable");
-    carousel.setAttribute("style", "left: 0px; height: 270px !important;");
+    carousel.setAttribute("class", "horizontally-scrollable romonitor-carousel");
+    carousel.setAttribute("style", "left: 0px;");
     carousel.setAttribute("id", "romonitor-carousel");
 
     const ul = document.createElement("ul");

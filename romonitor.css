@@ -23,6 +23,24 @@
     }
 }
 
+.romonitor-arrow {
+    height: 240px !important;
+}
+
+.romonitor-carousel {
+    height: 270px !important;
+}
+
+@media screen and (max-width : 543px) {
+    .romonitor-arrow {
+        height: 162px !important;
+    }
+
+    .romonitor-carousel {
+        height: 167px !important;
+    }
+}
+
 
 .romonitor-image {
     width: 150px;
