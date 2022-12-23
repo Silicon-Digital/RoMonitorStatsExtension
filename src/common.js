@@ -14,7 +14,7 @@ common = {
     createRobloxError: createRobloxError,
 
     async postData(data = {}, extension) {
-        return await fetch(config.apiEndpoint + extension, {
+        const response = await fetch(config.apiEndpoint + extension, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -23,6 +23,13 @@ common = {
         })
             .then((response) => romonitorResponseHandler(response))
             .catch((error) => romonitorErrorHandler(error));
+
+        if (response.success == false) {
+            createRobloxError(response.message, response.icon, response.message);
+            return;
+        }
+
+        return response;
     },
 
     async getData(uri) {

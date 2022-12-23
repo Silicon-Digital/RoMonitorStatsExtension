@@ -40,6 +40,11 @@ async function getGame() {
 }
 
 async function getTabs() {
+    // If the game config data is not truthy, we just return an empty array of tabs.
+    if (!gameConfig.data) {
+        return [];
+    }
+
     let options = await chrome.storage.sync.get({
         romonitorGameStatsDisplayed: true,
         romonitorGameMilestonesDisplayed: true,
