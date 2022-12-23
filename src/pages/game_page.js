@@ -1,4 +1,5 @@
-import common from './common'
+import common from '../common'
+
 
 let gameConfig = {
     activePlaceID: null,
@@ -18,66 +19,91 @@ export default {
     extendGame: async function () {
         await getGame();
 
-        buildTabs();
+        await buildTabs();
     }
 }
 
 // Get the data from API that is relevant the game page we are on. 
 async function getGame() {
     gameConfig.activePlaceID = document.querySelector("#game-detail-page").dataset.placeId;
-    return await common.postData({ game: gameConfig.activePlaceID }, gameConfig.apiExtension)
+    return await common.postData({game: gameConfig.activePlaceID}, gameConfig.apiExtension)
         .then((data) => {
             if (data && data.success) {
-                const tabFixCss = '.rbx-tab { width: 25% !important };';
-                const styleElement = document.createElement('style');
-                document.head.appendChild(styleElement);
-                styleElement.type = 'text/css';
-                styleElement.appendChild(document.createTextNode(tabFixCss));
 
                 gameConfig.data = data;
 
-            }
-            else if (data && data.success && data.message && data.code) {
+            } else if (data && data.success && data.message && data.code) {
                 common.createRobloxError(data.message, data.icon, data.code);
             }
 
         });
 }
 
-function getTabs() {
-    return [
-        {
-            title: 'Stats',
-            id: 'stats',
-        },
-        {
-            title: 'Milestones',
+async function getTabs() {
+    // If the game config data is not truthy, we just return an empty array of tabs.
+    if (!gameConfig.data) {
+        return [];
+    }
+
+    let options = await chrome.storage.sync.get({
+        romonitorGameStatsDisplayed: true,
+        romonitorGameMilestonesDisplayed: true,
+        romonitorGameSocialGraphDisplayed: true,
+        romonitorGameRoMonitorStatsDisplayed: true,
+        romonitorGameNameChangesDisplayed: true
+    })
+
+    const tabs = [];
+
+    if (options.romonitorGameStatsDisplayed) {
+        tabs.push(
+            {
+                title: common.getText("tabStats"),
+                id: 'stats',
+            }
+        )
+    }
+
+    if (options.romonitorGameMilestonesDisplayed) {
+        tabs.push({
+            title: common.getText('tabMilestones'),
             id: 'milestones',
-        },
-        {
-            title: 'Social Graph',
+        })
+    }
+
+    if (options.romonitorGameSocialGraphDisplayed) {
+        tabs.push({
+            title: common.getText('tabSocialGraph'),
             id: 'social-graph',
-        },
-        {
-            title: 'Name Changes',
+        })
+    }
+
+    if (options.romonitorGameNameChangesDisplayed) {
+        tabs.push({
+            title: common.getText('tabNameChanges'),
             id: 'name-changes',
-        },
-        {
-            title: 'RoMonitor Stats',
+        })
+    }
+
+    if (options.romonitorGameRoMonitorStatsDisplayed) {
+        tabs.push({
+            title: common.getText('tabRoMonitor'),
             id: 'go-to-stats',
             href: `https://romonitorstats.com/experience/${gameConfig.activePlaceID}/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough`,
             target: '_blank',
-        }
-    ];
+        })
+    }
+
+    return tabs;
 }
 
-function buildTabs() {
+async function buildTabs() {
     lastAddedTab = null;
 
-    getTabs().forEach((tab) => {
-        var gameNavigationTabs = document.getElementById("horizontal-tabs");
-        var newTab = gameNavigationTabs.lastElementChild.cloneNode(true);
-        var tabTitle = newTab.getElementsByClassName('text-lead')[0];
+    (await getTabs()).forEach((tab) => {
+        const gameNavigationTabs = document.getElementById("horizontal-tabs");
+        const newTab = gameNavigationTabs.lastElementChild.cloneNode(true);
+        const tabTitle = newTab.getElementsByClassName('text-lead')[0];
 
         tabTitle.textContent = tab.title;
         newTab.classList.remove("tab-game-instances");
@@ -97,8 +123,9 @@ function buildTabs() {
 
         lastAddedTab = tab.id;
 
+        let firstTabContent;
         if (!tab.href) {
-            var firstTabContent = document.getElementById('about').cloneNode(true);
+            firstTabContent = document.getElementById('about').cloneNode(true);
             firstTabContent.id = tab.id;
             firstTabContent.classList.add(tab.id);
             firstTabContent.innerHTML = '';
@@ -108,15 +135,14 @@ function buildTabs() {
 
             const containerHeader = document.createElement('div');
             containerHeader.classList.add('container-header');
-            const poweredByHtml =
-                containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">${common.poweredBy}</div>`;
+            containerHeader.innerHTML = `<h3>${tab.title}</h3><br><div class="text-secondary" style="margin-top: 1em;">${common.config.poweredBy}</div>`;
             firstTabContent.appendChild(containerHeader);
         }
 
         /** The following are lightweight queries to our servers, so we build these to make the tabs load faster, others are dynamically injected. */
-        if (tab.title === 'Milestones') {
+        if (tab.title === common.getText('tabMilestones')) {
             buildMilestonesTab();
-        } else if (tab.title === 'Stats') {
+        } else if (tab.title === common.getText('tabStats')) {
             buildStatsTab();
         }
 
@@ -125,13 +151,22 @@ function buildTabs() {
         }
     });
 
-    /** Adds event listeners to the default Roblox tabs */
-    const baseRobloxTabs = ['about', 'store', 'game-instances'];
-    baseRobloxTabs.forEach((tab) => {
-        const tabElement = document.getElementById(`tab-${tab}`);
+    if (lastAddedTab != null) {
+        const tabFixCss = '.rbx-tab { width: 25% !important };';
+        const styleElement = document.createElement('style');
+        document.head.appendChild(styleElement);
+        styleElement.type = 'text/css';
+        styleElement.appendChild(document.createTextNode(tabFixCss));
 
-        addTabListener(tabElement, document.getElementById(tab));
-    });
+
+        /** Adds event listeners to the default Roblox tabs */
+        const baseRobloxTabs = ['about', 'store', 'game-instances'];
+        baseRobloxTabs.forEach((tab) => {
+            const tabElement = document.getElementById(`tab-${tab}`);
+
+            addTabListener(tabElement, document.getElementById(tab));
+        });
+    }
 }
 
 function addTabListener(tab, aboutContent) {
@@ -169,7 +204,7 @@ function addTabListener(tab, aboutContent) {
                 tab.id = 'nameChanges';
             }
 
-            common.postData({ game: gameConfig.activePlaceID, tab: tab.id }, gameConfig.apiExtension)
+            common.postData({game: gameConfig.activePlaceID, tab: tab.id}, gameConfig.apiExtension)
                 .then((data) => {
                     if (data.success) {
                         if (tab.id === 'socialGraph') {
@@ -222,7 +257,7 @@ function buildStatsTab() {
     gameConfig.data.stats.items.forEach((item) => {
         const gridEntry = document.createElement('div');
         gridEntry.classList.add('romonitor-grid-item');
-        gridEntry.innerHTML =  `<h2 style="
+        gridEntry.innerHTML = `<h2 style="
                                     text-align: center;
                                     ">${item.copy}</h2>
                                     <p style="
@@ -239,13 +274,13 @@ function buildMilestonesTab() {
     const milestonesTable = document.createElement('table');
     milestonesTable.classList.add('table');
     milestonesTable.classList.add('table-striped');
-    milestonesTable.innerHTML = '<thead><tr><th class="text-label">Milestone</th><th class="text-label">Achived</th><th class="text-label">Tweets</th></tr></thead><tbody id="milestones-table"></tbody>';
+    milestonesTable.innerHTML = `<thead><tr><th class="text-label">${common.getText(`tableM_Milestone`)}</th><th class="text-label">${common.getText("tableM_Achived")}</th><th class="text-label">Tweets</th></tr></thead><tbody id="milestones-table"></tbody>`;
 
     if (!Object.keys(gameConfig.data.milestones).length) {
         const messageBanner = document.createElement('div');
 
         messageBanner.classList.add('message-banner');
-        messageBanner.innerHTML = `<span class="icon-warning"></span> This game has no tracked milestones`;
+        messageBanner.innerHTML = `<span class="icon-warning"></span> ${common.getText(`M_NotFound`)}`;
         messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
         milestonesContainer[0].appendChild(messageBanner);
 
@@ -267,67 +302,67 @@ function buildMilestonesTab() {
 }
 
 function buildNameChangesTab() {
-  document.getElementById('name-changes-loader').remove();
-  const nameChangesContainer = document.getElementsByClassName('tab-pane name-changes');
-  const nameChangesTable = document.createElement('table');
-  nameChangesTable.classList.add('table');
-  nameChangesTable.classList.add('table-striped');
-  nameChangesTable.innerHTML = '<thead><tr><th class="text-label">Name</th><th class="text-label">Changed</th></tr></thead><tbody id="name-changes-table"></tbody>';
+    document.getElementById('name-changes-loader').remove();
+    const nameChangesContainer = document.getElementsByClassName('tab-pane name-changes');
+    const nameChangesTable = document.createElement('table');
+    nameChangesTable.classList.add('table');
+    nameChangesTable.classList.add('table-striped');
+    nameChangesTable.innerHTML = `<thead><tr><th class="text-label">${common.getText(`tableNC_Name`)}</th><th class="text-label">${common.getText(`tableNC_Changed`)}</th></tr></thead><tbody id="name-changes-table"></tbody>`;
 
-  if (!Object.keys(nameChangesGraphData).length) {
-    const messageBanner = document.createElement('div');
+    if (!Object.keys(nameChangesGraphData).length) {
+        const messageBanner = document.createElement('div');
 
-    messageBanner.classList.add('message-banner');
-    messageBanner.innerHTML = `<span class="icon-warning"></span> This game has no tracked name changes`;
-    messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
-    nameChangesContainer[0].appendChild(messageBanner);
+        messageBanner.classList.add('message-banner');
+        messageBanner.innerHTML = `<span class="icon-warning"></span> ${common.getText(`NC_NotFound`)}`;
+        messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+        nameChangesContainer[0].appendChild(messageBanner);
 
-    return;
-  }
-  const limitWarning = document.createElement('div');
-  limitWarning.classList.add('text-label');
-  limitWarning.innerHTML = 'Showing the Last 10 Name Changes';
+        return;
+    }
+    const limitWarning = document.createElement('div');
+    limitWarning.classList.add('text-label');
+    limitWarning.innerHTML = common.getText(`NC_LimitNote`);
 
-  nameChangesContainer[0].appendChild(limitWarning);
-  nameChangesContainer[0].appendChild(nameChangesTable);
+    nameChangesContainer[0].appendChild(limitWarning);
+    nameChangesContainer[0].appendChild(nameChangesTable);
 
-  Object.keys(nameChangesGraphData).reverse().forEach((changeIndex) => {
-    const nameChange = nameChangesGraphData[changeIndex];
-    const changeEntry = document.createElement('tr');
-    changeEntry.innerHTML = `<td>${nameChange.name}</td><td>${nameChange.changed}</td>`;
+    Object.keys(nameChangesGraphData).reverse().forEach((changeIndex) => {
+        const nameChange = nameChangesGraphData[changeIndex];
+        const changeEntry = document.createElement('tr');
+        changeEntry.innerHTML = `<td>${nameChange.name}</td><td>${nameChange.changed}</td>`;
 
-    document.getElementById('name-changes-table').appendChild(changeEntry);
-  });
+        document.getElementById('name-changes-table').appendChild(changeEntry);
+    });
 }
 
 function buildSocialGraphTab() {
-  document.getElementById('social-graph-loader').remove();
-  const socialGraphContainer = document.getElementsByClassName('tab-pane social-graph');
+    document.getElementById('social-graph-loader').remove();
+    const socialGraphContainer = document.getElementsByClassName('tab-pane social-graph');
 
-  if (!socialGraphData.items) {
-    const socialGraphMessageBanner = document.createElement('div');
+    if (!socialGraphData.items) {
+        const socialGraphMessageBanner = document.createElement('div');
 
-    socialGraphMessageBanner.classList.add('message-banner');
-    socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> This game has no trackable social graph`;
-    socialGraphMessageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
-    socialGraphContainer[0].appendChild(socialGraphMessageBanner);
-  } else {
-    const flexboxContainer = document.createElement('div');
+        socialGraphMessageBanner.classList.add('message-banner');
+        socialGraphMessageBanner.innerHTML = `<span class="icon-warning"></span> ${socials_NotFound}`;
+        socialGraphMessageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+        socialGraphContainer[0].appendChild(socialGraphMessageBanner);
+    } else {
+        const flexboxContainer = document.createElement('div');
 
-    flexboxContainer.style = 'display: flex; flex-wrap: wrap;';
-    socialGraphData.items.forEach((item) => {
-      const gridEntry = document.createElement('div');
-      gridEntry.classList.add('romonitor-grid-item');
-      gridEntry.innerHTML = `<h2 style="
+        flexboxContainer.style = 'display: flex; flex-wrap: wrap;';
+        socialGraphData.items.forEach((item) => {
+            const gridEntry = document.createElement('div');
+            gridEntry.classList.add('romonitor-grid-item');
+            gridEntry.innerHTML = `<h2 style="
       text-align: center;
   ">${item.copy}</h2>
       <p style="
       text-align: center;
   ">${item.title}</p>`
-      flexboxContainer.appendChild(gridEntry);
-    });
+            flexboxContainer.appendChild(gridEntry);
+        });
 
-    socialGraphContainer[0].appendChild(flexboxContainer);
-  }
+        socialGraphContainer[0].appendChild(flexboxContainer);
+    }
 }
 

@@ -9,3 +9,48 @@
     margin-left: 15%;
     margin-right: 85%;
 }
+
+.romonitor-image-container {
+    width: 150px !important;
+    height: 150px !important;
+    border-radius: 8px;
+}
+
+@media (max-width : 543px) {
+    .romonitor-image-container {
+        width: 90px !important;
+        height: 90px !important;
+    }
+}
+
+.romonitor-arrow {
+    height: 240px !important;
+}
+
+.romonitor-carousel {
+    height: 270px !important;
+}
+
+@media screen and (max-width : 543px) {
+    .romonitor-arrow {
+        height: 162px !important;
+    }
+
+    .romonitor-carousel {
+        height: 167px !important;
+    }
+}
+
+
+.romonitor-image {
+    width: 150px;
+    height: 150px;
+}
+@media screen and (max-width : 543px) {
+    .romonitor-image {
+        width: 90px;
+        height: 90px;
+    }
+}
+
+

@@ -1,4 +1,4 @@
-import common from './common'
+import common from '../common'
 
 let discoverConfig = {
     data: null,
@@ -6,32 +6,35 @@ let discoverConfig = {
     robloxGameUri: "https://www.roblox.com/games/",
     leftId: "romonitor-left",
     rightId: "romonitor-right",
-    maxCards: 5,
-    cardWidth: 208
-
+    maxCards: 50,
+    cardWidth: 210
 }
 
 let current = 0;
 
 export default {
     extendDiscover: async function () {
-        await common.getDiscoverData().then(
-            (data) => {
-                discoverConfig.data = data;
-            }
-        );
 
-        buildDiscoverSearch();
+        let options = await chrome.storage.sync.get({discoverTopExperiencesDisplayed: true});
+
+        if (options.discoverTopExperiencesDisplayed) {
+            await common.getDiscoverData().then(
+                (data) => {
+                    discoverConfig.data = data;
+                }
+            );
+
+            buildDiscoverSearch();
+        }
+
     }
 }
 
 function buildDiscoverSearch() {
-    let container;
-
-    // Perform a bunch of checks here to make sure the 
+    // Perform a bunch of checks here to make sure the
     // HTML looks like it is expected, to avoid extension breaking/doing 
     // weird things if webpage is updated in the future. 
-    
+
     const carouselList = document.getElementById("games-carousel-page");
     if (!carouselList) {
         return
@@ -80,25 +83,26 @@ function buildGameListContainer() {
     container.setAttribute("data-testid", "game-carousel-games-container");
     container.className = "games-list-container"
 
-    container.appendChild(buildHeader("Top Experiences", "/"));
+    container.appendChild(buildHeader(common.getText("Top_Experiences")));
     container.appendChild(buildList());
-    
+
     return container;
 }
 
-function buildHeader(title, href) {
+function buildHeader(title) {
     const header = document.createElement("div");
     header.setAttribute("data-testid", "game-lists-game-container-header");
     header.setAttribute("class", "container-header games-filter-changer");
 
-    header.innerHTML = `
-        <h2>${title}</h2>
-        <a
-            href="${href}"
-            class="see-all-button games-filter-changer btn-secondary-xs btn-more see-all-link-icon"
-            data-testid="game-lists-game-container-header-see-all-button">${common.config.poweredByText}</a>
-        `
-    return header
+    header.innerHTML = `<h2>
+                            ${title} 
+                        </h2>
+                        <a href="https://romonitorstats.com/leaderboard/active/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough" target="_blank">
+                            <div class="btn-secondary-xs see-all-link-icon btn-more">
+                                ${common.getText('PoweredBy')} <span class="text-link">RoMonitor Stats</span>
+                            </div>
+                        </a>`;
+    return header;
 }
 
 function buildList() {
@@ -130,22 +134,21 @@ function calculateCardsPerScreen() {
 
 function buildLeftButton() {
     const leftScroll = document.createElement("div");
-    leftScroll.setAttribute("class", `scroller prev disabled ${discoverConfig.leftId}`);
+    leftScroll.setAttribute("class", `scroller prev disabled ${discoverConfig.leftId} romonitor-arrow`);
     leftScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     leftScroll.setAttribute("role", "button");
     leftScroll.setAttribute("tabindex", "0");
 
-    leftScroll.innerHTML = 
+    leftScroll.innerHTML =
         `
-        <div class="arrow">
+        <div class="arrow romonitor-arrow">
             <span class="icon-games-carousel-left"></span>
         </div>
         <div class="spacer"></div>
     
         `
-    leftScroll.addEventListener("click", (e) => {
+    leftScroll.addEventListener("click", () => {
         changeCurrent(-calculateCardsPerScreen());
-        updateCarousel;
     });
     return leftScroll;
 
@@ -153,20 +156,20 @@ function buildLeftButton() {
 
 function buildRightButton() {
     const rightScroll = document.createElement("div");
-    rightScroll.setAttribute("class", `scroller next ${discoverConfig.rightId}`);
+    rightScroll.setAttribute("class", `scroller next ${discoverConfig.rightId} romonitor-arrow`);
     rightScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     rightScroll.setAttribute("role", "button");
     rightScroll.setAttribute("tabindex", "0");
 
-    rightScroll.innerHTML = 
+    rightScroll.innerHTML =
         `
-        <div class="arrow">
+        <div class="arrow romonitor-arrow">
             <span class="icon-games-carousel-right"></span>
         </div>
         <div class="spacer"></div>
     
         `
-    rightScroll.addEventListener("click", (e) => {
+    rightScroll.addEventListener("click", () => {
         changeCurrent(calculateCardsPerScreen());
     });
     return rightScroll;
@@ -177,12 +180,11 @@ function changeCurrent(delta) {
 
     if (current < 0) {
         current = 0;
-    }
-    else if (current > discoverConfig.data.length - 1) {
+    } else if (current > discoverConfig.data.length - 1) {
         current = discoverConfig.data.length - 1;
     }
 
-    let newPx = -current * discoverConfig.cardWidth;
+    let newPx = -current * discoverConfig.cardWidth * 0.9;
 
     let carousel = document.getElementById("romonitor-carousel");
     carousel.setAttribute("style", `left: ${newPx}px;`)
@@ -190,7 +192,7 @@ function changeCurrent(delta) {
 
 function buildCarousel() {
     const carousel = document.createElement("div");
-    carousel.setAttribute("class", "horizontally-scrollable");
+    carousel.setAttribute("class", "horizontally-scrollable romonitor-carousel");
     carousel.setAttribute("style", "left: 0px;");
     carousel.setAttribute("id", "romonitor-carousel");
 
@@ -198,48 +200,47 @@ function buildCarousel() {
     ul.setAttribute("class", "hlist games game-cards game-tile-list")
     carousel.appendChild(ul);
 
-    let length = discoverConfig.data.length - 1; 
+    let length = discoverConfig.data.length - 1;
 
     discoverConfig.data.forEach((game, index) => {
-        if (index == 0) {
+        if (index === 0) {
             ul.appendChild(buildGame(game, "first-tile"));
 
-        } 
-        else if (index == length) {
+        } else if (index === length) {
             ul.appendChild(buildGame(game, "last-tile"));
-        } else{
+        } else {
             ul.appendChild(buildGame(game))
         }
     });
 
 
-    return carousel; 
+    return carousel;
 }
 
-function buildGame(game, extraClass="") {
+function buildGame(game, extraClass = "") {
     const href = discoverConfig.robloxGameUri + game.placeId
     const li = document.createElement("li");
-    li.setAttribute("class", "list-item hover-game-tile " + extraClass);
+    li.setAttribute("class", "list-item game-tile " + extraClass);
     li.id = game.placeId;
     const liDiv = document.createElement("div");
     li.appendChild(liDiv);
 
 
-    liDiv.setAttribute("class", "featured-game-container game-card-container");
+    liDiv.setAttribute("class", "featured-game-container game-card-container image-container");
     liDiv.innerHTML = `
         <a class="game-card-link" href="${href}">
             <div class="featured-game-icon-container">
-                <span class="thumbnail-2d-container brief-game-icon">
-                    <img class src="${game.icon}" alt=${game.name} title="${game.name}"></img>
+                <span class="romonitor-image-container thumbnail-2d-container brief-game-icon game-card-thumb">
+                    <img class="romonitor-image" src="${game.icon}" alt=${game.name} title="${game.name}" loading="lazy">
                 </span>
             </div>
             <div class="info-container">
-                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}">${game.name}</div>
+                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}" style="padding-top: 6px;">${game.name}</div>
                 <div data-testid="game-tile-card-info" class="game-card-info">
                     <span class="info-label icon-votes-gray"></span>
                     <span class="info-label vote-percentage-label" data-testid="game-tile-card-info-vote-label">${common.fixPercentage(game.rating)}</span>
                     <span class="info-label icon-playing-counts-gray"></span>
-                    <span class="info-label playing-counts-label" title="${game.playing}">${common.fixPlayCount(game.playing)}</span>
+                    <span class="info-label playing-counts-label" style="" title="${game.playing}">${common.fixPlayCount(game.playing)}</span>
                 </div>
             </div>
         </a>
@@ -248,17 +249,15 @@ function buildGame(game, extraClass="") {
         </div>
         `
 
-    
-
 
     // Dynamic card 
     /*
-    If a Dynamic card hover wants to be added, a new div should be made here. Currently will be static. 
+    If a Dynamic card hover wants to be added, a new div should be made here. Currently, will be static.
     */
 
     return li;
 }
 
 /**
- * 
+ *
  */

@@ -11,16 +11,16 @@ let pageEnum = {
 }
 
 window.addEventListener('load', async function () {
-    // Result of prefab check indicates which type of page we are on. 
+    // Result of prefab check indicates which type of page we are on.
     const check_id = checkPage();
 
 
     if (check_id == pageEnum.game) {
-        gamePage.extendGame();
+        await gamePage.extendGame();
     } else if (check_id == pageEnum.home) {
-        homePage.extendPage();
+        await homePage.extendPage();
     } else if (check_id == pageEnum.discover) {
-        discover_page.extendDiscover();
+        await discover_page.extendDiscover();
     }
 });
 

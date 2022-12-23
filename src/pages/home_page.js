@@ -1,4 +1,4 @@
-import common from './common'
+import common from '../common'
 
 let config = common.config;
 let homeConfig = {
@@ -8,13 +8,19 @@ let homeConfig = {
 
 export default {
     extendPage: async function () {
-        await common.getDiscoverData().then(
-            (data) => {
-                homeConfig.data = data;
-            }
-        );
 
-        buildHomeSearch();
+        let options = await chrome.storage.sync.get({homeTopExperiencesDisplayed: true});
+
+        if (options.homeTopExperiencesDisplayed) {
+            await common.getDiscoverData().then(
+                (data) => {
+                    homeConfig.data = data;
+                }
+            );
+
+            buildHomeSearch();
+        }
+
     }
 }
 
@@ -45,7 +51,7 @@ function buildHomeSearch() {
 
     // Once the search/carousel container is found, add our new search to the page. 
     container.insertBefore(buildCarousel(), container.children.item(2));
-    container.insertBefore(buildHomePageTitle("Top Experiences", "https://romonitorstats.com/"), container.children.item(2));
+    container.insertBefore(buildHomePageTitle(common.getText('Top_Experiences'), "https://romonitorstats.com/"), container.children.item(2));
 
     // Function puts the title/search in the correct place on the page. 
     updateHomePage(container);
@@ -94,17 +100,17 @@ function updateHomePage(container) {
 
 }
 
-function buildHomePageTitle(title, href) {
+function buildHomePageTitle(title) {
     let newTitle = document.createElement("div");
     newTitle.className = 'container-header';
     newTitle.innerHTML = `<h2>
-                          <a href="${href}">
                             ${title} 
-                          </a>
                         </h2>
-                        <div class="btn-secondary-xs see-all-link-icon btn-more">
-                          ${config.poweredBy}
-                        </div>`;
+                        <a href="https://romonitorstats.com/leaderboard/active/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough" target="_blank">
+                            <div class="btn-secondary-xs see-all-link-icon btn-more">
+                                ${common.getText('PoweredBy')} <span class="text-link">RoMonitor Stats</span>
+                            </div>
+                        </a>`;
     newTitle.id = "romonitor-title";
     return newTitle;
 }

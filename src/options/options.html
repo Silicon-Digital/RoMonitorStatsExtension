@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RoMonitor Stats Extension Options</title>
+    <link rel="stylesheet" href="options.css"/>
+</head>
+<body>
+
+<!-- Main Page Layout, When You First Click On The Extension Button-->
+<div id="general-settings-page" class="container">
+    <img src="../RomonitorLogo.png" alt="romonitor logo">
+    <button id="btn-home-page-settings">Home Page Settings</button>
+    <button id="btn-discover-page-settings">Discover Page Settings</button>
+    <button id="btn-game-page-settings">Game Page Settings</button>
+</div>
+
+<!-- when user clicks on "home page settings" button -->
+<div id="homepage-settings-page" class="settings-page" style="display: none;">
+    <div class="title-container">
+        <button class="back-button"> < </button>
+        <span>Home Page</span>
+    </div>
+
+    <div class="body-container">
+        <div class="label-input-container">         
+            <label>Display Top Experiences</label>
+            <label class="switch">
+                <input type="checkbox" id="romonitorHomeTopExperiencesDisplayed">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<div id="discover-settings-page" class="settings-page" style="display: none;">
+    <div class="title-container">
+        <button class="back-button"> < </button>
+        <span> Discover Page </span>
+    </div>
+
+    <div class="body-container">
+        <div class="label-input-container">
+            <label>Display Top Experiences</label>
+            <label class="switch">
+                <input type="checkbox" id="romonitorDiscoverTopExperiencesDisplayed">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </div>
+
+</div>
+
+<div id="game-page-settings-page" class="settings-page" style="display: none;">
+
+    <div class="title-container">
+        <button class="back-button"> < </button>
+        <span> Game Page </span>
+    </div>
+
+    <div class="body-container">
+
+        <div class="label-input-container">
+            <label> Display Stats </label>
+            <label class="switch">
+                <input type="checkbox" id="romonitorGameStatsDisplayed">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+        <div class="label-input-container">
+            <label> Display Milestones </label>
+            <label class="switch">
+                <input type="checkbox" id="romonitorGameMilestonesDisplayed">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+        
+        <div class="label-input-container">
+            <label> Display Social Graph </label>
+            <label class="switch">
+                <input type="checkbox" id="romonitorGameSocialGraphDisplayed">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+        <div class="label-input-container">
+            <label> Display Name Changes </label>
+            <label class="switch">
+                <input type="checkbox" id="romonitorGameNameChangesDisplayed">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+    </div>
+</div>
+
+<script src="options.js"></script>
+</body>
+</html>
