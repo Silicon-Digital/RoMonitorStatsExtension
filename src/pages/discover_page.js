@@ -20,9 +20,10 @@ export default {
                 discoverConfig.data = data;
             }
         );
-
+            
         buildDiscoverSearch();
-    }
+    },
+    destroyDiscover,
 }
 
 function buildDiscoverSearch() {
@@ -31,7 +32,7 @@ function buildDiscoverSearch() {
     // Perform a bunch of checks here to make sure the 
     // HTML looks like it is expected, to avoid extension breaking/doing 
     // weird things if webpage is updated in the future. 
-    
+
     const carouselList = document.getElementById("games-carousel-page");
     if (!carouselList) {
         return
@@ -67,6 +68,12 @@ function buildDiscoverSearch() {
     observer.observe(carouselList, config);
 }
 
+function destroyDiscover() {
+    const carouselList = document.getElementById("games-carousel-page");
+    const title = document.getElementById(discoverConfig.discoverId);
+    carouselList.removeChild(title);
+}
+
 function updateDiscoverPage(carouselList) {
     const title = document.getElementById(discoverConfig.discoverId);
     carouselList.removeChild(title);
@@ -80,9 +87,9 @@ function buildGameListContainer() {
     container.setAttribute("data-testid", "game-carousel-games-container");
     container.className = "games-list-container"
 
-    container.appendChild(buildHeader("Top Experiences", "/"));
+    container.appendChild(buildHeader("Top Experiences", "https://romonitorstats.com/leaderboard/active/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough"));
     container.appendChild(buildList());
-    
+
     return container;
 }
 
@@ -92,18 +99,20 @@ function buildHeader(title, href) {
     header.setAttribute("class", "container-header games-filter-changer");
 
     header.innerHTML = `
-        <h2>${title}</h2>
+        <h2>${title}<br><div class="text-secondary">Ranked by CCUs - ${common.config.poweredBy}</div></h2>
+        
         <a
             href="${href}"
+            target="_blank"
             class="see-all-button games-filter-changer btn-secondary-xs btn-more see-all-link-icon"
-            data-testid="game-lists-game-container-header-see-all-button">${common.config.poweredByText}</a>
+            data-testid="game-lists-game-container-header-see-all-button">View Playing Leaderboard</a>
         `
     return header
 }
 
 function buildList() {
     const scroller = document.createElement("div");
-    scroller.setAttribute("class", "horizontal-scroller games-list large-tiles");
+    scroller.setAttribute("class", "horizontal-scroller games-list");
 
     const container = document.createElement("div");
     container.setAttribute("class", "clearfix horizontal-scroll-window");
@@ -134,8 +143,9 @@ function buildLeftButton() {
     leftScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     leftScroll.setAttribute("role", "button");
     leftScroll.setAttribute("tabindex", "0");
+    leftScroll.id = "romonitor-carousel-left-button"
 
-    leftScroll.innerHTML = 
+    leftScroll.innerHTML =
         `
         <div class="arrow">
             <span class="icon-games-carousel-left"></span>
@@ -145,7 +155,10 @@ function buildLeftButton() {
         `
     leftScroll.addEventListener("click", (e) => {
         changeCurrent(-calculateCardsPerScreen());
-        updateCarousel;
+
+        if (current == 0) {
+            leftScroll.classList.add("disabled");
+        }
     });
     return leftScroll;
 
@@ -158,7 +171,7 @@ function buildRightButton() {
     rightScroll.setAttribute("role", "button");
     rightScroll.setAttribute("tabindex", "0");
 
-    rightScroll.innerHTML = 
+    rightScroll.innerHTML =
         `
         <div class="arrow">
             <span class="icon-games-carousel-right"></span>
@@ -168,6 +181,14 @@ function buildRightButton() {
         `
     rightScroll.addEventListener("click", (e) => {
         changeCurrent(calculateCardsPerScreen());
+
+        const leftScroll = document.getElementById("romonitor-carousel-left-button");
+
+        if (current == 0) {
+            leftScroll.classList.add("disabled");
+        } else {
+            leftScroll.classList.remove("disabled");
+        }
     });
     return rightScroll;
 }
@@ -198,57 +219,48 @@ function buildCarousel() {
     ul.setAttribute("class", "hlist games game-cards game-tile-list")
     carousel.appendChild(ul);
 
-    let length = discoverConfig.data.length - 1; 
+    let length = discoverConfig.data.length - 1;
 
     discoverConfig.data.forEach((game, index) => {
         if (index == 0) {
             ul.appendChild(buildGame(game, "first-tile"));
 
-        } 
+        }
         else if (index == length) {
             ul.appendChild(buildGame(game, "last-tile"));
-        } else{
+        } else {
             ul.appendChild(buildGame(game))
         }
     });
 
 
-    return carousel; 
+    return carousel;
 }
 
-function buildGame(game, extraClass="") {
+function buildGame(game, extraClass = "") {
     const href = discoverConfig.robloxGameUri + game.placeId
     const li = document.createElement("li");
-    li.setAttribute("class", "list-item hover-game-tile " + extraClass);
+    li.setAttribute("class", "list-item game-card game-tile " + extraClass);
     li.id = game.placeId;
+    li.title = game.name;
     const liDiv = document.createElement("div");
     li.appendChild(liDiv);
 
-
-    liDiv.setAttribute("class", "featured-game-container game-card-container");
+    liDiv.setAttribute("class", "game-card-container");
     liDiv.innerHTML = `
         <a class="game-card-link" href="${href}">
-            <div class="featured-game-icon-container">
-                <span class="thumbnail-2d-container brief-game-icon">
+            <div class="game-card-thumb-container">
+                <span class="thumbnail-2d-container game-card-thumb">
                     <img class src="${game.icon}" alt=${game.name} title="${game.name}"></img>
                 </span>
             </div>
-            <div class="info-container">
-                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}">${game.name}</div>
-                <div data-testid="game-tile-card-info" class="game-card-info">
-                    <span class="info-label icon-votes-gray"></span>
-                    <span class="info-label vote-percentage-label" data-testid="game-tile-card-info-vote-label">${common.fixPercentage(game.rating)}</span>
-                    <span class="info-label icon-playing-counts-gray"></span>
-                    <span class="info-label playing-counts-label" title="${game.playing}">${common.fixPlayCount(game.playing)}</span>
-                </div>
+            <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}">${game.name}</div>
+            <div data-testid="game-tile-card-info" class="game-card-info">
+                <span class="info-label icon-votes-gray"></span><span data-testid="game-tile-card-info-vote-label" class="info-label vote-percentage-label">${common.fixPercentage(game.rating)}</span><span class="info-label icon-playing-counts-gray"></span><span class="info-label playing-counts-label" title="${game.playing}">${common.fixPlayCount(game.playing)}</span>
             </div>
         </a>
-
-        <div>
-        </div>
         `
 
-    
 
 
     // Dynamic card 
