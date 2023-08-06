@@ -45,7 +45,7 @@ function buildHomeSearch() {
 
     // Once the search/carousel container is found, add our new search to the page. 
     container.insertBefore(buildCarousel(), container.children.item(2));
-    container.insertBefore(buildHomePageTitle("Top Experiences", "https://romonitorstats.com/"), container.children.item(2));
+    container.insertBefore(buildHomePageTitle("Top Experiences", "https://romonitorstats.com/leaderboard/active/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough"), container.children.item(2));
 
     // Function puts the title/search in the correct place on the page. 
     updateHomePage(container);
@@ -98,13 +98,15 @@ function buildHomePageTitle(title, href) {
     let newTitle = document.createElement("div");
     newTitle.className = 'container-header';
     newTitle.innerHTML = `<h2>
-                          <a href="${href}">
                             ${title} 
-                          </a>
+                          <br><div class="text-secondary">Ranked by CCUs - ${common.config.poweredBy}</div>
                         </h2>
-                        <div class="btn-secondary-xs see-all-link-icon btn-more">
-                          ${config.poweredBy}
-                        </div>`;
+                        <a class="btn-secondary-xs see-all-link-icon btn-more"
+                            href="${href}"
+                            target="_blank"
+                        >
+                          See All
+                        </a>`;
     newTitle.id = "romonitor-title";
     return newTitle;
 }
