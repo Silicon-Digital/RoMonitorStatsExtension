@@ -1,5 +1,9 @@
 
-function romonitorResponseHandler(response) {
+function romonitorResponseHandler(response, showErrors = true) {
+    if (!showErrors) {
+        return response.json();
+    }
+
     if (response.status === 429) {
         this.createRobloxError("You're sending too many requests to RoMonitor Stats");
         return;
@@ -34,9 +38,40 @@ function createRobloxError(message, icon = 'icon-warning', code = null) {
     tabContainer.insertBefore(messageBanner, tabContainer.firstChild);
 }
 
+function waitForElement(id) {
+    return new Promise(resolve => {
+        if (document.getElementById(id)) {
+            return resolve(document.getElementById(id));
+        }
+
+        const observer = new MutationObserver(mutations => {
+            if (document.getElementById(id)) {
+                resolve(document.getElementById(id));
+                observer.disconnect();
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+}
+
+function extractID(url) {
+    const parts = url.split('/');
+    for (let i = parts.length - 1; i >= 0; i--) {
+      if (!isNaN(parts[i])) {
+        return parts[i];
+      }
+    }
+
+    return null; // return null if no numeric ID found
+}
+
 let config = {
     apiEndpoint: 'https://romonitorstats.com/api/v1/',
-    poweredBy: `Powered by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
+    poweredBy: `Powered by <a href="https://romonitorstats.com/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough" class="text-link">RoMonitor Stats</a>`,
     poweredByText: `Powered by RoMonitor Stats`
 }
 
@@ -45,8 +80,10 @@ let common;
 common = {
     config: config,
     createRobloxError: createRobloxError,
+    waitForElement: waitForElement,
+    extractID: extractID,
 
-    async postData(data = {}, extension) {
+    async postData(data = {}, extension, showErrors = true) {
         return await fetch(config.apiEndpoint + extension, {
             method: 'POST',
             headers: {
@@ -54,8 +91,12 @@ common = {
             },
             body: JSON.stringify(data)
         })
-            .then((response) => romonitorResponseHandler(response))
-            .catch((error) => romonitorErrorHandler(error));
+            .then((response) => romonitorResponseHandler(response, showErrors))
+            .catch((error) => {
+                if (showErrors) {
+                    romonitorErrorHandler(error);
+                }
+            });
     },
 
     async getData(uri) {
@@ -69,10 +110,10 @@ common = {
             return toString(count);
         }
         else if (count < 1000000) {
-            return (Math.round(10 * count / 1000) / 10).toString() + "k"
+            return (Math.round(10 * count / 1000) / 10).toString() + "K"
         }
         else {
-            return (Math.round(10 * count / 1000000) / 10).toString() + "m"
+            return (Math.round(10 * count / 1000000) / 10).toString() + "M"
         }
     },
 
