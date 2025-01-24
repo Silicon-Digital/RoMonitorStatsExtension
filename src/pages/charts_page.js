@@ -20,7 +20,7 @@ export default {
             }
         );
 
-        common.waitForElements('.games-page-container, .section', () => {
+        common.waitForElements('.filters-container', () => {
             buildDiscoverSearch();
         });
 
