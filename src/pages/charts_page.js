@@ -249,7 +249,6 @@ function buildCarousel() {
         }
     });
 
-
     return carousel;
 }
 
@@ -284,14 +283,6 @@ function buildGame(game, extraClass = "") {
         <div>
         </div>
         `
-
-
-
-
-    // Dynamic card 
-    /*
-    If a Dynamic card hover wants to be added, a new div should be made here. Currently will be static. 
-    */
 
     return li;
 }

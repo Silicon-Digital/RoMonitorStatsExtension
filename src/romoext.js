@@ -2,7 +2,6 @@ import gamePage from './pages/game_page'
 import homePage from './pages/home_page'
 import charts_page from './pages/charts_page'
 
-
 let pageEnum = {
     noPage: 0, // For when a page does not match any of the ones that the extension is interested in. 
     game: 1,
@@ -36,7 +35,3 @@ function checkPage() {
 
     return pageEnum.noPage;
 }
-
-
-
-

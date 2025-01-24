@@ -1,6 +1,5 @@
 import common from './common';
 
-let config = common.config;
 let homeConfig = {
     data: null,
 };
