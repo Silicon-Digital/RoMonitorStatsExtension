@@ -14,7 +14,6 @@ window.addEventListener('load', async function () {
     // Result of prefab check indicates which type of page we are on. 
     const check_id = checkPage();
 
-
     if (check_id == pageEnum.game) {
         gamePage.extendGame();
     } else if (check_id == pageEnum.home) {
@@ -26,7 +25,7 @@ window.addEventListener('load', async function () {
 
 function checkPage() {
     const path = window.location.pathname;
-    /** Check we're on a Roblox games page */
+
     if (path.match(/\/games\/.*/)) {
         return pageEnum.game;
     } else if (path.match(/\/home/)) {
@@ -34,6 +33,7 @@ function checkPage() {
     } else if (path.match(/\/charts/)) {
         return pageEnum.charts;
     }
+
     return pageEnum.noPage;
 }
 
