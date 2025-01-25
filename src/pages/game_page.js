@@ -26,7 +26,8 @@ export default {
 
 // Get the data from API that is relevant the experience page we are on. 
 async function getGame() {
-    gameConfig.activePlaceID = document.querySelector("#game-detail-page").dataset.placeId;
+    gameConfig.activePlaceID = document.querySelector("#game-detail-meta-data").dataset.rootPlaceId;
+
     return await common.postData({ game: gameConfig.activePlaceID }, gameConfig.apiExtension)
         .then((data) => {
             if (data && data.success) {
@@ -218,12 +219,15 @@ function buildStatsTab() {
 
     common.waitForElements('.count-left, .count-right', () => {
         /** Set Rating Card -- We use the data already on the experience page for this */
-        const upVotes = Number(document.getElementsByClassName('count-left')[0].firstElementChild.title)
-        const downVotes = Number(document.getElementsByClassName('count-right')[0].firstElementChild.title)
+        const votingDataset = document.getElementById('voting-section').dataset;
+        const upVotes = Number(votingDataset.totalUpVotes);
+        const downVotes = Number(votingDataset.totalDownVotes);
 
+        const ratingCalculation = (upVotes / (upVotes + downVotes) * 100).toFixed(2);
+        
         gameConfig.data.stats.items.push({
             title: 'Rating',
-            copy: `${(upVotes / (upVotes + downVotes) * 100).toFixed(2)}%`,
+            copy: `${isNaN(ratingCalculation) ? 0 : ratingCalculation}%`,
         });
 
         gameConfig.data.stats.items.forEach((item) => {
