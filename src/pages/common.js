@@ -24,20 +24,66 @@ function romonitorErrorHandler(error) {
     Promise.reject(error);
 }
 
-function createRobloxError(message, icon = 'icon-warning', code = null) {
+function createRobloxError(message, icon = 'icon-warning', code = null, placeId = null) {
     const tabContainer = document.getElementsByClassName('col-xs-12 rbx-tabs-horizontal')[0];
     const messageBanner = document.createElement('div');
 
     messageBanner.classList.add('message-banner');
     messageBanner.innerHTML = `<span class="${icon}"></span> ${message}`;
     messageBanner.style = 'margin-bottom: 1em; margin-top: 1em;';
+
+    if (code === 'not-found' && placeId) {
+        // Add close button to the banner and append to the end
+        const closeButton = document.createElement('button');
+        closeButton.classList.add('btn-close');
+
+        // Style the close button to look like a large "X"
+        closeButton.textContent = '×'; // Large "X"
+        closeButton.style = `
+        font-size: 1.5em;
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        float: right;
+        line-height: 1;
+        padding: 0;
+    `;
+
+        closeButton.title = 'Don\'t show this message again for this experience.';
+
+        closeButton.onclick = () => messageBanner.remove();
+        messageBanner.appendChild(closeButton);
+
+        // Add PlaceID to the list of dismissed PlaceIDs
+        let dismissedPlaceIds = JSON.parse(localStorage.getItem(config.storageKeys.dismissedPlaceIds)) || [];
+        dismissedPlaceIds.push(placeId);
+        localStorage.setItem(config.storageKeys.dismissedPlaceIds, JSON.stringify(dismissedPlaceIds));
+    }
+
     tabContainer.insertBefore(messageBanner, tabContainer.firstChild);
 }
 
 let config = {
     apiEndpoint: 'https://romonitorstats.com/api/v1/',
-    poweredBy: `Powered by <a href="https://romonitorstats.com/" class="text-link">RoMonitor Stats</a>`,
-    poweredByText: `Powered by RoMonitor Stats`
+    poweredBy: `Powered by <a href="https://romonitorstats.com/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough" class="text-link">RoMonitor Stats</a>`,
+    poweredByText: `Powered by RoMonitor Stats`,
+    storageKeys: {
+        dismissedPlaceIds: 'RoMonitor.Extension.NotFoundDismissals'
+    }
+}
+
+function waitForElements(selector, callback) {
+    const observer = new MutationObserver((mutationsList, observer) => {
+        const elements = document.querySelectorAll(selector);
+
+        if (elements.length > 0) {
+            observer.disconnect();
+            callback(elements);
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
 }
 
 let common;
@@ -45,6 +91,7 @@ let common;
 common = {
     config: config,
     createRobloxError: createRobloxError,
+    waitForElements: waitForElements,
 
     async postData(data = {}, extension) {
         return await fetch(config.apiEndpoint + extension, {
@@ -82,11 +129,9 @@ common = {
     },
 
     async getDiscoverData() {
-        return await common.getData(config.apiEndpoint + "stats/featured-games/get/")
-            
+        return await common.getData(config.apiEndpoint + "extension/experiences-carousel/")
+
     }
-
 }
-
 
 export default common;

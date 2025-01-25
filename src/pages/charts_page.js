@@ -3,25 +3,54 @@ import common from './common'
 let discoverConfig = {
     data: null,
     discoverId: "romonitor-discover-carousel",
-    robloxGameUri: "https://www.roblox.com/games/",
+    robloxExperienceUri: "https://www.roblox.com/games/",
     leftId: "romonitor-left",
     rightId: "romonitor-right",
     maxCards: 5,
     cardWidth: 208
-
 }
 
 let current = 0;
 
 export default {
-    extendDiscover: async function () {
+    extendCharts: async function () {
         await common.getDiscoverData().then(
             (data) => {
                 discoverConfig.data = data;
             }
         );
 
-        buildDiscoverSearch();
+        common.waitForElements('.filters-container', () => {
+            buildDiscoverSearch();
+        });
+
+        const parentElement = document.body;
+
+        const observer = new MutationObserver((mutationsList) => {
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    mutation.removedNodes.forEach((node) => {
+                        if (node instanceof Element && node.classList.contains('filters-container')) {
+                            // We can assume here that the user has used the Roblox filters as Roblox destroys the filter container.
+                            const carousel = document.getElementById(discoverConfig.discoverId);
+
+                            if (carousel) {
+                                carousel.remove();
+                            }
+
+                            common.waitForElements('.games-page-container, .section', () => {
+                                buildDiscoverSearch();
+                            });
+                        }
+                    });
+                }
+            }
+        });
+
+        observer.observe(parentElement, {
+            childList: true,
+            subtree: true,
+        });
     }
 }
 
@@ -31,15 +60,13 @@ function buildDiscoverSearch() {
     // Perform a bunch of checks here to make sure the 
     // HTML looks like it is expected, to avoid extension breaking/doing 
     // weird things if webpage is updated in the future. 
-    
-    const carouselList = document.getElementById("games-carousel-page");
+
+    const carouselList = document.getElementById("games-carousel-page").firstChild.firstChild;
     if (!carouselList) {
         return
     }
 
-
-    // Once the search/carousel container is found, add our new search to the page. 
-    carouselList.insertBefore(buildGameListContainer(), carouselList.children.item(2));
+    carouselList.insertBefore(buildGameListContainer(), carouselList.children.item(4));
 
     // Function puts the title/search in the correct place on the page. 
     // updateHomePage(carouselList);
@@ -59,18 +86,11 @@ function buildDiscoverSearch() {
         };
 
         observer.disconnect();
-        updateDiscoverPage(carouselList);
         observer.observe(carouselList, config);
     }
 
     const observer = new MutationObserver(callback);
     observer.observe(carouselList, config);
-}
-
-function updateDiscoverPage(carouselList) {
-    const title = document.getElementById(discoverConfig.discoverId);
-    carouselList.removeChild(title);
-    carouselList.insertBefore(buildGameListContainer(), carouselList.children.item(2));
 }
 
 function buildGameListContainer() {
@@ -80,25 +100,40 @@ function buildGameListContainer() {
     container.setAttribute("data-testid", "game-carousel-games-container");
     container.className = "games-list-container"
 
-    container.appendChild(buildHeader("Top Experiences", "/"));
+    container.appendChild(buildHeader("Top Experiences", "https://romonitorstats.com/leaderboard/active/?utm_source=roblox&utm_medium=extension&utm_campaign=extension_leadthrough", "Results for all devices and locations"));
     container.appendChild(buildList());
-    
+
     return container;
 }
 
-function buildHeader(title, href) {
+function buildHeader(title, href, subtitleText = "") {
+    const headerContainer = document.createElement("div");
+    headerContainer.setAttribute("class", "game-sort-header-container");
+
     const header = document.createElement("div");
     header.setAttribute("data-testid", "game-lists-game-container-header");
     header.setAttribute("class", "container-header games-filter-changer");
 
+
     header.innerHTML = `
-        <h2>${title}</h2>
+        <h2 class="sort-header">${title}</h2>
         <a
             href="${href}"
+            target="_blank"
             class="see-all-button games-filter-changer btn-secondary-xs btn-more see-all-link-icon"
             data-testid="game-lists-game-container-header-see-all-button">${common.config.poweredByText}</a>
         `
-    return header
+
+    headerContainer.appendChild(header);
+
+    const subtitle = document.createElement("div");
+    subtitle.setAttribute("class", "sort-subtitle-container");
+
+    subtitle.innerHTML = `<span class="font-sort-subtitle text-default">${subtitleText}</span>`
+
+    headerContainer.appendChild(subtitle);
+
+    return headerContainer;
 }
 
 function buildList() {
@@ -134,8 +169,9 @@ function buildLeftButton() {
     leftScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     leftScroll.setAttribute("role", "button");
     leftScroll.setAttribute("tabindex", "0");
+    leftScroll.style = "height: 240px;"
 
-    leftScroll.innerHTML = 
+    leftScroll.innerHTML =
         `
         <div class="arrow">
             <span class="icon-games-carousel-left"></span>
@@ -145,7 +181,6 @@ function buildLeftButton() {
         `
     leftScroll.addEventListener("click", (e) => {
         changeCurrent(-calculateCardsPerScreen());
-        updateCarousel;
     });
     return leftScroll;
 
@@ -157,8 +192,9 @@ function buildRightButton() {
     rightScroll.setAttribute("data-testid", "game-carousel-scroll-bar");
     rightScroll.setAttribute("role", "button");
     rightScroll.setAttribute("tabindex", "0");
+    rightScroll.style = "height: 240px;"
 
-    rightScroll.innerHTML = 
+    rightScroll.innerHTML =
         `
         <div class="arrow">
             <span class="icon-games-carousel-right"></span>
@@ -185,7 +221,7 @@ function changeCurrent(delta) {
     let newPx = -current * discoverConfig.cardWidth;
 
     let carousel = document.getElementById("romonitor-carousel");
-    carousel.setAttribute("style", `left: ${newPx}px;`)
+    carousel.setAttribute("style", `left: ${newPx}px; height: 270px !important;`);
 }
 
 function buildCarousel() {
@@ -193,51 +229,51 @@ function buildCarousel() {
     carousel.setAttribute("class", "horizontally-scrollable");
     carousel.setAttribute("style", "left: 0px;");
     carousel.setAttribute("id", "romonitor-carousel");
+    carousel.style = 'height: 270px !important;'
 
     const ul = document.createElement("ul");
     ul.setAttribute("class", "hlist games game-cards game-tile-list")
     carousel.appendChild(ul);
 
-    let length = discoverConfig.data.length - 1; 
+    let length = discoverConfig.data.length - 1;
 
     discoverConfig.data.forEach((game, index) => {
         if (index == 0) {
-            ul.appendChild(buildGame(game, "first-tile"));
+            ul.appendChild(buildGame(game, " first-tile"));
 
-        } 
+        }
         else if (index == length) {
-            ul.appendChild(buildGame(game, "last-tile"));
-        } else{
+            ul.appendChild(buildGame(game, " last-tile"));
+        } else {
             ul.appendChild(buildGame(game))
         }
     });
 
-
-    return carousel; 
+    return carousel;
 }
 
-function buildGame(game, extraClass="") {
-    const href = discoverConfig.robloxGameUri + game.placeId
+function buildGame(game, extraClass = "") {
+    const href = discoverConfig.robloxExperienceUri + game.placeId
     const li = document.createElement("li");
-    li.setAttribute("class", "list-item hover-game-tile " + extraClass);
+    li.setAttribute("class", "list-item game-card game-tile" + extraClass);
     li.id = game.placeId;
     const liDiv = document.createElement("div");
     li.appendChild(liDiv);
 
 
-    liDiv.setAttribute("class", "featured-game-container game-card-container");
+    liDiv.setAttribute("class", "game-card-container");
     liDiv.innerHTML = `
         <a class="game-card-link" href="${href}">
-            <div class="featured-game-icon-container">
-                <span class="thumbnail-2d-container brief-game-icon">
-                    <img class src="${game.icon}" alt=${game.name} title="${game.name}"></img>
+            <div class="game-card-thumb-container">
+                <span class="thumbnail-2d-container game-card-thumb">
+                    <img class src="${game.icon}" alt=${game.name} title="${game.name}" loading="lazy"></img>
                 </span>
             </div>
-            <div class="info-container">
-                <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}">${game.name}</div>
+            <div data-testid="game-tile-game-name" class="game-card-name game-name-title" title="${game.name}">${game.name}</div>
+            <div class="game-card-info">
                 <div data-testid="game-tile-card-info" class="game-card-info">
                     <span class="info-label icon-votes-gray"></span>
-                    <span class="info-label vote-percentage-label" data-testid="game-tile-card-info-vote-label">${common.fixPercentage(game.rating)}</span>
+                    <span class="info-label vote-percentage-label">${common.fixPercentage(game.rating)}</span>
                     <span class="info-label icon-playing-counts-gray"></span>
                     <span class="info-label playing-counts-label" title="${game.playing}">${common.fixPlayCount(game.playing)}</span>
                 </div>
@@ -248,17 +284,5 @@ function buildGame(game, extraClass="") {
         </div>
         `
 
-    
-
-
-    // Dynamic card 
-    /*
-    If a Dynamic card hover wants to be added, a new div should be made here. Currently will be static. 
-    */
-
     return li;
 }
-
-/**
- * 
- */
